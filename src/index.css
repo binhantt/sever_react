@@ -1,0 +1,53 @@
+/* Sidebar Styles */
+.sidebar {
+  background: linear-gradient(180deg, #2c3e50 0%, #2c3e50 100%);
+}
+
+.menu-item:hover {
+  background-color: rgba(255,255,255,0.05) !important;
+  border-left: 4px solid #3498db !important;
+}
+
+.menu-item.active {
+  background-color: rgba(255,255,255,0.1) !important;
+  border-left: 4px solid #3498db !important;
+}
+
+.menu-item .icon-container {
+  transition: color 0.2s ease;
+}
+
+.menu-item:hover .icon-container {
+  color: #3498db !important;
+}
+
+/* Main Content Wrapper */
+.main-content {
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+  padding: 20px;
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 60px);
+}
+
+.main-content.sidebar-collapsed {
+  margin-left: 80px;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
