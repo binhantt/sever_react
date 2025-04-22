@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, InputGroup } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { Logo } from '../components/common/Logo';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -20,7 +20,6 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle login logic here
     console.log('Form submitted:', formData);
   };
 
@@ -29,80 +28,121 @@ const Login = () => {
       minHeight: '100vh',
       display: 'flex',
       alignItems: 'center',
-      background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+      backgroundColor: '#f1f4f9',
       padding: '2rem 0'
     }}>
       <Container>
         <Row className="justify-content-center">
-          <Col xs={12} sm={10} md={8} lg={6} xl={5}>
-            <Card className="shadow-lg border-0 rounded-lg" style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)'
+          <Col xs={12} sm={10} md={8} lg={5} xl={4}>
+            <div className="text-center mb-4">
+              <Logo size={40} variant="primary" showText />
+            </div>
+            <Card className="border-0" style={{
+              backgroundColor: '#fff',
+              boxShadow: '0 0.25rem 0.75rem rgba(0,0,0,0.08)'
             }}>
-              <Card.Header className="bg-primary bg-gradient text-white text-center py-4">
-                <h3 className="font-weight-light my-2">ADMIN</h3>
-              </Card.Header>
-              <Card.Body className="p-5">
+              <Card.Body className="p-4">
+                <h5 className="text-center mb-4" style={{ color: '#3c4d69', fontWeight: 500 }}>
+                  Đăng nhập vào hệ thống
+                </h5>
+                
                 <Form onSubmit={handleSubmit}>
-                  <Form.Group className="mb-4">
+                  <Form.Group className="mb-3">
+                    <Form.Label style={{ fontSize: '0.813rem', color: '#6e84a3' }}>
+                      Email
+                    </Form.Label>
                     <InputGroup>
-                      <InputGroup.Text className="bg-primary text-white">
-                        <FaEnvelope />
-                      </InputGroup.Text>
                       <Form.Control
                         type="email"
                         name="email"
-                        placeholder="Nhập email của bạn"
+                        placeholder="example@email.com"
                         value={formData.email}
                         onChange={handleChange}
                         required
-                        className="py-2"
+                        style={{
+                          fontSize: '0.875rem',
+                          height: '38px',
+                          borderColor: '#edf2f9',
+                          backgroundColor: '#f1f4f9'
+                        }}
+                        className="border-end-0"
                       />
+                      <InputGroup.Text style={{
+                        backgroundColor: '#f1f4f9',
+                        borderColor: '#edf2f9',
+                        color: '#95aac9'
+                      }}>
+                        <FaEnvelope size={14} />
+                      </InputGroup.Text>
                     </InputGroup>
                   </Form.Group>
 
-                  <Form.Group className="mb-4">
+                  <Form.Group className="mb-3">
+                    <Form.Label style={{ fontSize: '0.813rem', color: '#6e84a3' }}>
+                      Mật khẩu
+                    </Form.Label>
                     <InputGroup>
-                      <InputGroup.Text className="bg-primary text-white">
-                        <FaLock />
-                      </InputGroup.Text>
                       <Form.Control
                         type={showPassword ? "text" : "password"}
                         name="password"
-                        placeholder="Nhập mật khẩu của bạn"
+                        placeholder="••••••••"
                         value={formData.password}
                         onChange={handleChange}
                         required
-                        className="py-2"
+                        style={{
+                          fontSize: '0.875rem',
+                          height: '38px',
+                          borderColor: '#edf2f9',
+                          backgroundColor: '#f1f4f9'
+                        }}
+                        className="border-end-0"
                       />
-                      <Button
-                        variant="outline-secondary"
+                      <InputGroup.Text 
+                        role="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="d-flex align-items-center"
+                        style={{
+                          backgroundColor: '#f1f4f9',
+                          borderColor: '#edf2f9',
+                          color: '#95aac9',
+                          cursor: 'pointer'
+                        }}
                       >
-                        {showPassword ? <FaEyeSlash /> : <FaEye />}
-                      </Button>
+                        {showPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
+                      </InputGroup.Text>
                     </InputGroup>
                   </Form.Group>
 
-                  <Form.Group className="mb-4">
+                  <div className="d-flex justify-content-between align-items-center mb-4">
                     <Form.Check
                       type="checkbox"
                       label="Ghi nhớ đăng nhập"
-                      className="text-secondary"
+                      style={{ fontSize: '0.813rem', color: '#6e84a3' }}
                     />
-                  </Form.Group>
-
-                  <div className="d-grid">
-                    <Button
-                      type="submit"
-                      variant="primary"
-                      size="lg"
-                      className="text-uppercase fw-bold py-3"
+                    <a 
+                      href="#forgot-password" 
+                      style={{ 
+                        fontSize: '0.813rem', 
+                        color: '#2c7be5',
+                        textDecoration: 'none'
+                      }}
                     >
-                      Đăng nhập
-                    </Button>
+                      Quên mật khẩu?
+                    </a>
                   </div>
+
+                  <Button
+                    type="submit"
+                    className="w-100"
+                    style={{
+                      backgroundColor: '#2c7be5',
+                      border: 'none',
+                      height: '38px',
+                      fontSize: '0.875rem',
+                      fontWeight: 500
+                    }}
+                  >
+                    Đăng nhập
+                  </Button>
                 </Form>
               </Card.Body>
             </Card>

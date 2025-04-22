@@ -1,159 +1,118 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Nav } from 'react-bootstrap';
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  FaHome, FaUsers, FaChartBar, FaCog, FaSignOutAlt, 
-  FaClipboardList, FaShoppingCart, FaFileAlt 
+  FaHome, 
+  FaUsers, 
+  FaShoppingCart, 
+  FaClipboardList,
+  FaChartBar,
+  FaCog,
+  FaSignOutAlt
 } from 'react-icons/fa';
+import { Logo } from '../common/Logo';
+
+const menuItems = [
+  {
+    path: "/",
+    name: "Trang chủ",
+    icon: <FaHome size={16} />
+  },
+  {
+    path: "/users",
+    name: "Người dùng",
+    icon: <FaUsers size={16} />
+  },
+  {
+    path: "/orders",
+    name: "Đơn hàng",
+    icon: <FaShoppingCart size={16} />
+  },
+  {
+    path: "/products",
+    name: "Sản phẩm",
+    icon: <FaClipboardList size={16} />
+  },
+  {
+    path: "/analytics",
+    name: "Thống kê",
+    icon: <FaChartBar size={16} />
+  },
+  {
+    path: "/settings",
+    name: "Cài đặt",
+    icon: <FaCog size={16} />
+  }
+];
 
 const Sidebar = () => {
-  const [isExpanded, setIsExpanded] = useState(true);
   const location = useLocation();
 
-  const menuItems = [
-    {
-      path: "/home",
-      name: "Trang chủ",
-      icon: <FaHome size={20} />
-    },
-    {
-      path: "/users",
-      name: "Người dùng",
-      icon: <FaUsers size={20} />
-    },
-    {
-      path: "/orders",
-      name: "Đơn hàng",
-      icon: <FaShoppingCart size={20} />
-    },
-    {
-      path: "/products",
-      name: "Sản phẩm",
-      icon: <FaClipboardList size={20} />
-    },
-    {
-      path: "/reports",
-      name: "Báo cáo",
-      icon: <FaFileAlt size={20} />
-    },
-    {
-      path: "/analytics",
-      name: "Thống kê",
-      icon: <FaChartBar size={20} />
-    },
-    {
-      path: "/settings",
-      name: "Cài đặt",
-      icon: <FaCog size={20} />
-    }
-  ];
+  const MenuItem = ({ item }) => {
+    const isActive = location.pathname === item.path;
+    return (
+      <Nav.Link 
+        as={Link} 
+        to={item.path}
+        className={`d-flex align-items-center text-decoration-none ${isActive ? 'active' : ''}`}
+        style={{
+          color: isActive ? '#3c4d69' : '#6e84a3',
+          backgroundColor: isActive ? '#f1f4f9' : 'transparent',
+          fontSize: '0.813rem',
+          padding: '0.5rem 1rem',
+          borderRadius: '0.25rem',
+          margin: '0.125rem 0.5rem',
+          transition: 'all 0.2s'
+        }}
+      >
+        <div className="icon-container" style={{ width: '20px', textAlign: 'center' }}>
+          {item.icon}
+        </div>
+        <span className="ms-2 text-nowrap">{item.name}</span>
+      </Nav.Link>
+    );
+  };
 
   return (
     <div 
-      className={`sidebar ${isExpanded ? 'expanded' : 'collapsed'}`}
-      style={{
-        width: isExpanded ? '280px' : '80px',
-        minHeight: '100vh',
-        transition: 'all 0.3s ease',
-        position: 'fixed',
-        left: 0,
-        top: '60px',
-        backgroundColor: '#000',
-        boxShadow: '3px 0 10px rgba(255,255,255,0.1)',
-        zIndex: 1000
+      className="position-fixed h-100 d-flex flex-column"
+      style={{ 
+        width: '250px',
+        backgroundColor: '#fff',
+        borderRight: '1px solid #edf2f9',
+        zIndex: 1030
       }}
     >
-      <Nav className="flex-column pt-3">
-        {menuItems.map((item, index) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <Nav.Link 
-              as={Link} 
-              to={item.path}
-              key={index}
-              className={`
-                menu-item 
-                d-flex 
-                align-items-center 
-                px-4 
-                py-3 
-                text-white 
-                ${isActive ? 'active' : ''}
-              `}
-              style={{
-                backgroundColor: isActive ? '#333' : 'transparent',
-                borderLeft: isActive ? '4px solid #fff' : '4px solid transparent',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  backgroundColor: '#333',
-                  borderLeft: '4px solid #fff'
-                }
-              }}
-            >
-              <span className="icon-container" style={{ 
-                width: '30px',
-                color: isActive ? '#fff' : '#ccc'
-              }}>
-                {item.icon}
-              </span>
-              {isExpanded && (
-                <span className="ms-3 text-white" style={{
-                  opacity: isExpanded ? 1 : 0,
-                  transition: 'opacity 0.2s ease'
-                }}>
-                  {item.name}
-                </span>
-              )}
-            </Nav.Link>
-          );
-        })}
-      </Nav>
-
-      <div className="position-absolute bottom-0 w-100 pb-4">
-        <Nav.Link 
-          className="d-flex align-items-center px-4 py-3 text-white"
-          style={{
-            transition: 'all 0.2s ease',
-            '&:hover': {
-              backgroundColor: '#333'
-            }
-          }}
-        >
-          <span className="icon-container" style={{ width: '30px', color: '#fff' }}>
-            <FaSignOutAlt size={20} />
-          </span>
-          {isExpanded && (
-            <span className="ms-3 text-white">Đăng xuất</span>
-          )}
-        </Nav.Link>
+      {/* Logo */}
+      <div className="p-2 border-bottom" style={{ borderColor: '#edf2f9', height: '50px' }}>
+        <Logo size={32} variant="primary" />
       </div>
 
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        style={{
-          position: 'absolute',
-          right: '-15px',
-          top: '20px',
-          background: '#333',
-          border: '1px solid #444',
-          color: '#fff',
-          width: '30px',
-          height: '30px',
-          borderRadius: '50%',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 2px 5px rgba(255,255,255,0.1)',
-          transition: 'transform 0.2s ease',
-          '&:hover': {
-            transform: 'scale(1.1)',
-            background: '#444'
-          }
-        }}
-      >
-        {isExpanded ? '◀' : '▶'}
-      </button>
+      {/* Menu Items */}
+      <Nav className="flex-column flex-grow-1 py-2">
+        {menuItems.map((item, index) => (
+          <MenuItem key={index} item={item} />
+        ))}
+      </Nav>
+
+      {/* Logout Button */}
+      <div className="p-2 border-top" style={{ borderColor: '#edf2f9' }}>
+        <Nav.Link 
+          as={Link} 
+          to="/logout"
+          className="d-flex align-items-center text-decoration-none"
+          style={{ 
+            color: '#6e84a3',
+            fontSize: '0.813rem',
+            padding: '0.5rem 1rem',
+            borderRadius: '0.25rem',
+            margin: '0 0.5rem'
+          }}
+        >
+          <FaSignOutAlt size={16} />
+          <span className="ms-2">Đăng xuất</span>
+        </Nav.Link>
+      </div>
     </div>
   );
 };
