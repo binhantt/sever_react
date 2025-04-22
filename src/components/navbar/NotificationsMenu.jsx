@@ -20,7 +20,7 @@ const NotificationsMenu = () => {
           position: 'relative'
         }}
       >
-
+        <FaBell size={18} className="text-light opacity-75" />
       </Dropdown.Toggle>
       <Dropdown.Menu 
         className="shadow-lg border-0"
