@@ -2,7 +2,7 @@ import { FaHome, FaUsers, FaShoppingCart, FaClipboardList, FaChartBar, FaCog } f
 
 const menuItems = [
   {
-    path: "/",
+    path: "/home",
     name: "Trang chủ",
     icon: { component: FaHome, size: 16 }
   },
