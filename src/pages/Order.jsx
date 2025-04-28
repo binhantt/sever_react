@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Row, Col, Button } from 'react-bootstrap';
+import { Container, Row, Col, Button, Form } from 'react-bootstrap';
 import Layout from '../components/layout/Layout';
 import { FaSearch } from 'react-icons/fa';
 import OrderTable from '../components/order/OrderTable';
@@ -24,9 +24,17 @@ const Order = () => {
             <h3>Quản lý Đơn hàng</h3>
           </Col>
           <Col className="text-end">
-            <Button variant="primary">
-              <FaSearch className="me-1" /> Tìm kiếm
-            </Button>
+            <div className="d-flex justify-content-end">
+              <Form.Control
+                type="search"
+                placeholder="Tìm kiếm đơn hàng..."
+                className="me-2"
+                style={{ width: '250px' }}
+              />
+              <Button variant="primary">
+                <FaSearch className="me-1" /> 
+              </Button>
+            </div>
           </Col>
         </Row>
         
