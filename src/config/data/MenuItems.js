@@ -7,6 +7,11 @@ const menuItems = [
     icon: { component: FaHome, size: 16 }
   },
   {
+    path: "/categories",
+    name: "Danh mục sản phẩm",
+    icon: { component: FaClipboardList, size: 16 } // hoặc thay bằng icon khác nếu bạn thích
+  },
+  {
     path: "/users",
     name: "Người dùng",
     icon: { component: FaUsers, size: 16 }
@@ -26,6 +31,7 @@ const menuItems = [
     name: "Thống kê",
     icon: { component: FaChartBar, size: 16 }
   },
+
   {
     path: "/settings",
     name: "Cài đặt",

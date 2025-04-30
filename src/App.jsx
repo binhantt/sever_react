@@ -6,6 +6,7 @@ import User from './pages/USer';
 import Order from './pages/Order';
 import Product from './pages/Product';
 import Stats from './pages/Stats';
+import ProductCategory from './pages/ProductCategory'; // Thêm import mới
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/users" element={<User />} />
         <Route path="/orders" element={<Order />} />
         <Route path="/products" element={<Product />} />
+        <Route path="/categories" element={<ProductCategory />} /> {/* Thêm route mới */}
         <Route path="/analytics" element={<Stats />} />
       </Routes>
     </Router>
