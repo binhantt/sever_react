@@ -19,7 +19,7 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
  * 
  *
  */
-const OrderTable = ({ orders = [] }) => {
+const OrderTable = ({ orders = [], onEdit, onDelete }) => {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Đã giao':
@@ -70,10 +70,19 @@ const OrderTable = ({ orders = [] }) => {
                     <td className="align-middle">{getStatusBadge(order.status)}</td>
                     <td className="align-middle text-end">{order.total.toLocaleString()}đ</td>
                     <td className="align-middle text-center">
-                      <Button variant="outline-primary" size="sm" className="me-1">
+                      <Button 
+                        variant="outline-primary" 
+                        size="sm" 
+                        className="me-2"
+                        onClick={() => onEdit(order)}
+                      >
                         <FaEdit />
                       </Button>
-                      <Button variant="outline-danger" size="sm">
+                      <Button 
+                        variant="outline-danger" 
+                        size="sm"
+                        onClick={() => onDelete(order.id)}
+                      >
                         <FaTrash />
                       </Button>
                     </td>
