@@ -1,41 +1,92 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Modal, Form, Button } from 'react-bootstrap';
 
-const UserManagementModal = ({ showModal, handleClose, editingUser, newUser, setNewUser, handleSubmit }) => {
+const UserManagementModal = ({ 
+  show, 
+  handleClose, 
+  handleSubmit,
+  user = null,
+  isEditing = false 
+}) => {
+  const [formData, setFormData] = useState({
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    role: user?.role || 'user',
+    active: user?.active ?? true
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   return (
-    <Modal show={showModal} onHide={handleClose} centered>
+    <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
-        <Modal.Title>{editingUser ? 'Sửa người dùng' : 'Thêm người dùng'}</Modal.Title>
+        <Modal.Title>{isEditing ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'}</Modal.Title>
       </Modal.Header>
-      <Form onSubmit={handleSubmit}>
+      <Form onSubmit={(e) => {
+        e.preventDefault();
+        handleSubmit(formData);
+      }}>
         <Modal.Body>
           <Form.Group className="mb-3">
             <Form.Label>Tên</Form.Label>
             <Form.Control
               type="text"
-              value={newUser.name}
-              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
               required
-              className="shadow-sm"
             />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Email</Form.Label>
             <Form.Control
               type="email"
-              value={newUser.email}
-              onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
               required
-              className="shadow-sm"
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Số điện thoại</Form.Label>
+            <Form.Control
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Vai trò</Form.Label>
+            <Form.Select 
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+            >
+              <option value="user">Người dùng</option>
+              <option value="admin">Quản trị viên</option>
+            </Form.Select>
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Check
+              type="checkbox"
+              label="Kích hoạt tài khoản"
+              name="active"
+              checked={formData.active}
+              onChange={(e) => setFormData(prev => ({ ...prev, active: e.target.checked }))}
             />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
-            Đóng
+            Hủy
           </Button>
           <Button variant="primary" type="submit">
-            {editingUser ? 'Lưu thay đổi' : 'Thêm'}
+            {isEditing ? 'Cập nhật' : 'Thêm mới'}
           </Button>
         </Modal.Footer>
       </Form>

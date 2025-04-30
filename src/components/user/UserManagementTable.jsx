@@ -198,85 +198,67 @@ const UserManagementTable = ({
         
         <Card.Body className="p-4">
           <div className="table-responsive">
+        
             <Table className="table-hover" style={{ minWidth: '800px' }}>
               <thead>
                 <tr>
                   <th className="border-0 text-muted" style={{ fontSize: '0.95rem', width: 70 }}>ID</th>
                   <th className="border-0 text-muted" style={{ fontSize: '0.95rem', width: '25%' }}>Thông tin</th>
-                  <th className="border-0 text-muted" style={{ fontSize: '0.95rem', width: '30%' }}>Email</th>
+                  <th className="border-0 text-muted" style={{ fontSize: '0.95rem', width: '20%' }}>Email</th>
+                  <th className="border-0 text-muted text-center" style={{ fontSize: '0.95rem', width: '15%' }}>Vai trò</th>
                   <th className="border-0 text-muted text-center" style={{ fontSize: '0.95rem', width: '15%' }}>Trạng thái</th>
-                  <th className="border-0 text-muted text-center" style={{ fontSize: '0.95rem', width: '15%' }}>Chức danh</th>
                   <th className="border-0 text-muted text-center" style={{ fontSize: '0.95rem', width: 100 }}>Hành động</th>
                 </tr>
               </thead>
               <tbody>
-                {currentUsers.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="text-center py-5 text-muted">
-                      Không có người dùng nào.
+                {currentUsers.map(user => (
+                  <tr key={user.id}>
+                    <td className="border-0 fw-medium">#{user.id}</td>
+                    <td className="border-0">
+                      <div className="d-flex align-items-center">
+                        <div className="bg-light rounded-circle p-2 me-2">
+                          <FaUserCircle size={22} className="text-primary" />
+                        </div>
+                        <div>
+                          <div className="fw-semibold">{user.name}</div>
+                          <div className="small text-muted">{user.phone || 'Chưa cập nhật'}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="border-0">
+                      <span className="text-muted">{user.email}</span>
+                    </td>
+                    <td className="border-0 text-center">
+                      <Badge bg={user.role === 'admin' ? 'primary' : 'secondary'} className="fw-normal">
+                        {user.role === 'admin' ? 'Quản trị' : 'Người dùng'}
+                      </Badge>
+                    </td>
+                    <td className="border-0 text-center">
+                      {user.active ? (
+                        <Badge bg="success" className="fw-normal">Hoạt động</Badge>
+                      ) : (
+                        <Badge bg="danger" className="fw-normal">Khóa</Badge>
+                      )}
+                    </td>
+                    <td className="border-0 text-center">
+                      <Button 
+                        variant="outline-primary" 
+                        size="sm" 
+                        className="me-2"
+                        onClick={() => handleShowEdit(user)}
+                      >
+                        <FaEdit />
+                      </Button>
+                      <Button 
+                        variant="outline-danger" 
+                        size="sm"
+                        onClick={() => handleDelete(user.id)}
+                      >
+                        <FaTrash />
+                      </Button>
                     </td>
                   </tr>
-                ) : (
-                  currentUsers.map(user => (
-                    <tr key={user.id}>
-                      <td className="border-0 fw-medium">#{user.id}</td>
-                      <td className="border-0">
-                        <div className="d-flex align-items-center">
-                          <div className="bg-light rounded-circle p-2 me-2">
-                            <FaUserCircle size={22} className="text-primary" />
-                          </div>
-                          <div>
-                            <div className="fw-semibold">{user.name}</div>
-                            {user.phone && (
-                              <div className="small text-muted">{user.phone}</div>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="border-0">
-                        <span className="text-muted">{user.email}</span>
-                      </td>
-                      <td className="border-0 text-center">
-                        {user.active ? (
-                          <Badge bg="success" className="fw-normal">Hoạt động</Badge>
-                        ) : (
-                          <Badge bg="danger" className="fw-normal">Khóa</Badge>
-                        )}
-                      </td>
-                      <td className="border-0 text-center">
-                        <Badge bg={user.role === 'admin' ? 'dark' : 'info'} className="fw-normal">
-                          {user.role === 'admin' ? 'Quản trị' : 'Người dùng'}
-                        </Badge>
-                      </td>
-                      <td className="border-0 text-center">
-                        <div className="d-flex justify-content-center gap-2">
-                          <OverlayTrigger placement="top" overlay={<Tooltip>Chỉnh sửa</Tooltip>}>
-                            <Button
-                              variant="outline-primary"
-                              size="sm"
-                              className="d-flex align-items-center justify-content-center p-1"
-                              style={{ width: '32px', height: '32px' }}
-                              onClick={() => handleShowEdit(user)}
-                            >
-                              <FaEdit size={14} />
-                            </Button>
-                          </OverlayTrigger>
-                          <OverlayTrigger placement="top" overlay={<Tooltip>Xóa</Tooltip>}>
-                            <Button
-                              variant="outline-danger"
-                              size="sm"
-                              className="d-flex align-items-center justify-content-center p-1"
-                              style={{ width: '32px', height: '32px' }}
-                              onClick={() => handleDelete(user.id)}
-                            >
-                              <FaTrash size={14} />
-                            </Button>
-                          </OverlayTrigger>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
+                ))}
               </tbody>
             </Table>
           </div>

@@ -61,6 +61,7 @@ const Order = () => {
     e.preventDefault();
     // Xử lý thêm/sửa đơn hàng
     setShowModal(false);
+    toast.success(`Đã ${currentOrder ? 'cập nhật' : 'thêm'} đơn hàng thành công!`);
   };
 
   return (

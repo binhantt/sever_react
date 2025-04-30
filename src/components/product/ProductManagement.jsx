@@ -1,13 +1,10 @@
 import React from 'react';
-import { Card, Table, Badge, Container } from 'react-bootstrap';
+import { Card, Table, Badge, Container , Button } from 'react-bootstrap';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 
-const ProductManagement = ({ onEdit, onDelete }) => {
-  // Dữ liệu tạm thời - sau này sẽ thay bằng API hoặc props
-  const products = [
-    { id: 1, name: 'Sản phẩm 1', price: 100000, stock: 10, status: 'active' },
-    { id: 2, name: 'Sản phẩm 2', price: 200000, stock: 5, status: 'inactive' }
-  ];
+
+const ProductManagement = ({ products = [], onEdit, onDelete }) => {
+
 
   return (
     <Container fluid className="p-0 mt-4">

@@ -7,27 +7,23 @@ import defaultUsers from '../../config/data/UserConfig';
 const UserManagement = () => {
   const [users, setUsers] = useState(defaultUsers);
   const [showModal, setShowModal] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
-  const [newUser, setNewUser] = useState({ name: '', email: '' });
+  const [currentUser, setCurrentUser] = useState(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
   const handleClose = () => {
     setShowModal(false);
-    setEditingUser(null);
-    setNewUser({ name: '', email: '' });
+    setCurrentUser(null);
   };
 
   const handleShowAdd = () => {
     setShowModal(true);
-    setEditingUser(null);
-    setNewUser({ name: '', email: '' });
+    setCurrentUser(null);
   };
 
   const handleShowEdit = (user) => {
     setShowModal(true);
-    setEditingUser(user);
-    setNewUser({ name: user.name, email: user.email });
+    setCurrentUser(user);
   };
 
   const handleDelete = (id) => {
@@ -36,16 +32,15 @@ const UserManagement = () => {
     setShowToast(true);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (editingUser) {
+  const handleSubmit = (formData) => {
+    if (currentUser) {
       setUsers(users.map(user => 
-        user.id === editingUser.id ? { ...user, ...newUser } : user
+        user.id === currentUser.id ? { ...user, ...formData } : user
       ));
-      setToastMessage('Sửa người dùng thành công!');
+      setToastMessage('Cập nhật người dùng thành công!');
     } else {
       const newId = users.length > 0 ? users[users.length - 1].id + 1 : 1;
-      setUsers([...users, { id: newId, ...newUser }]);
+      setUsers([...users, { id: newId, ...formData }]);
       setToastMessage('Thêm người dùng thành công!');
     }
     handleClose();
@@ -58,41 +53,30 @@ const UserManagement = () => {
         <h3>Quản lý người dùng</h3>
       
       </div>
+      
       <UserManagementTable 
         users={users} 
         handleShowEdit={handleShowEdit} 
         handleDelete={handleDelete} 
       />
-      <UserManagementModal 
-        showModal={showModal}
+      
+      <UserManagementModal
+        show={showModal}
         handleClose={handleClose}
-        editingUser={editingUser}
-        newUser={newUser}
-        setNewUser={setNewUser}
         handleSubmit={handleSubmit}
+        user={currentUser}
+        isEditing={!!currentUser}
       />
+      
       <Toast 
         show={showToast} 
         onClose={() => setShowToast(false)} 
         delay={3000} 
         autohide
-        className="position-fixed top-0 end-0 m-3"
+        className="position-fixed bottom-0 end-0 m-3"
       >
         <Toast.Body>{toastMessage}</Toast.Body>
       </Toast>
-
-      <style>{`
-        .hover-scale {
-          transition: transform 0.2s;
-        }
-        .hover-scale:hover {
-          transform: scale(1.05);
-        }
-        table {
-          border-radius: 8px;
-          overflow: hidden;
-        }
-      `}</style>
     </div>
   );
 };
