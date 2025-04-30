@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import {
   Card,
   Table,
@@ -28,7 +28,36 @@ import {
   FaEllipsisH,
 } from 'react-icons/fa';
 
-const UserManagementTable = ({ users, handleShowEdit, handleDelete, handleAddUser }) => {
+/**
+ * UserManagementTable - Component quản lý bảng người dùng
+ * 
+ * @component
+ * @description Hiển thị danh sách người dùng với các chức năng nâng cao
+ * 
+ * @prop {Array} users - Danh sách người dùng
+ * @prop {Function} handleShowEdit - Hàm mở modal chỉnh sửa người dùng
+ * @prop {Function} handleDelete - Hàm xóa người dùng
+ * @prop {Function} handleAddUser - Hàm thêm người dùng mới
+ * 
+ * @features
+ * - Tìm kiếm người dùng theo tên, email, ID
+ * - Sắp xếp người dùng theo nhiều tiêu chí
+ * - Phân trang linh hoạt
+ * - Hiển thị trạng thái và vai trò người dùng
+ * 
+ * @state
+ * - searchTerm: Từ khóa tìm kiếm
+ * - perPage: Số lượng người dùng trên mỗi trang
+ * - currentPage: Trang hiện tại
+ * - sortField: Trường sắp xếp
+ * - sortDirection: Hướng sắp xếp
+ */
+const UserManagementTable = ({ 
+  users = [], 
+  handleShowEdit, 
+  handleDelete, 
+  handleAddUser 
+}) => {
   // State for search, pagination, per page
   const [searchTerm, setSearchTerm] = useState('');
   const [perPage, setPerPage] = useState(5);
@@ -122,27 +151,7 @@ const UserManagementTable = ({ users, handleShowEdit, handleDelete, handleAddUse
   return (
     <Container fluid className="p-0">
       <Card className="mb-0 shadow-sm border-0 overflow-hidden">
-        <Card.Header className="bg-gradient bg-primary text-white py-3">
-          <Row className="align-items-center">
-            <Col>
-              <h5 className="mb-0 fw-bold d-flex align-items-center">
-                <FaUserCircle className="me-2" size={24} />
-                Quản lý người dùng
-              </h5>
-            </Col>
-            <Col xs="auto">
-              <Button 
-                variant="light" 
-                size="sm" 
-                className="d-flex align-items-center shadow-sm"
-                onClick={handleAddUser}
-              >
-                <FaUserPlus className="me-2" />
-                Thêm người dùng
-              </Button>
-            </Col>
-          </Row>
-        </Card.Header>
+       
         
         <div className="bg-light border-bottom py-3 px-3">
           <Row className="align-items-center g-3">
@@ -152,7 +161,7 @@ const UserManagementTable = ({ users, handleShowEdit, handleDelete, handleAddUse
                   <FaSearch className="text-muted" />
                 </InputGroup.Text>
                 <Form.Control
-                  placeholder="Tìm kiếm theo tên, email, ID..."
+                  placeholder="Tìm kiếm theo tên, email, ID.."
                   value={searchTerm}
                   onChange={e => {
                     setSearchTerm(e.target.value);
@@ -187,94 +196,31 @@ const UserManagementTable = ({ users, handleShowEdit, handleDelete, handleAddUse
           </Row>
         </div>
         
-        <Card.Body className="p-0">
+        <Card.Body className="p-4">
           <div className="table-responsive">
-            <Table hover className="mb-0 align-middle table-striped">
+            <Table className="table-hover" style={{ minWidth: '800px' }}>
               <thead>
-                <tr className="bg-light">
-                  <th className="text-center py-3" style={{ width: 70 }}>
-                    <div 
-                      className="d-flex align-items-center justify-content-center user-select-none"
-                      onClick={() => handleSort('id')}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <span className="small fw-bold">ID</span>
-                      <SortIndicator field="id" />
-                    </div>
-                  </th>
-                  <th className="py-3" style={{ width: '25%' }}>
-                    <div 
-                      className="d-flex align-items-center user-select-none"
-                      onClick={() => handleSort('name')}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <span className="small fw-bold">Thông tin</span>
-                      <SortIndicator field="name" />
-                    </div>
-                  </th>
-                  <th className="py-3" style={{ width: '30%' }}>
-                    <div 
-                      className="d-flex align-items-center user-select-none"
-                      onClick={() => handleSort('email')}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <span className="small fw-bold">Email</span>
-                      <SortIndicator field="email" />
-                    </div>
-                  </th>
-                  <th className="text-center py-3" style={{ width: '15%' }}>
-                    <div 
-                      className="d-flex align-items-center justify-content-center user-select-none"
-                      onClick={() => handleSort('active')}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <span className="small fw-bold">Trạng thái</span>
-                      <SortIndicator field="active" />
-                    </div>
-                  </th>
-                  <th className="text-center py-3" style={{ width: '15%' }}>
-                    <div 
-                      className="d-flex align-items-center justify-content-center user-select-none"
-                      onClick={() => handleSort('role')}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <span className="small fw-bold">Chức danh</span>
-                      <SortIndicator field="role" />
-                    </div>
-                  </th>
-                  <th className="text-center py-3" style={{ width: 100 }}>
-                    <span className="small fw-bold">Hành động</span>
-                  </th>
+                <tr>
+                  <th className="border-0 text-muted" style={{ fontSize: '0.95rem', width: 70 }}>ID</th>
+                  <th className="border-0 text-muted" style={{ fontSize: '0.95rem', width: '25%' }}>Thông tin</th>
+                  <th className="border-0 text-muted" style={{ fontSize: '0.95rem', width: '30%' }}>Email</th>
+                  <th className="border-0 text-muted text-center" style={{ fontSize: '0.95rem', width: '15%' }}>Trạng thái</th>
+                  <th className="border-0 text-muted text-center" style={{ fontSize: '0.95rem', width: '15%' }}>Chức danh</th>
+                  <th className="border-0 text-muted text-center" style={{ fontSize: '0.95rem', width: 100 }}>Hành động</th>
                 </tr>
               </thead>
               <tbody>
                 {currentUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-5">
-                      <div className="d-flex flex-column align-items-center text-muted">
-                        <FaUserCircle size={40} className="mb-3 opacity-50" />
-                        <p className="mb-0">Không có người dùng nào.</p>
-                        <p className="small">Vui lòng thử tìm kiếm khác hoặc thêm người dùng mới.</p>
-                      </div>
+                    <td colSpan={6} className="text-center py-5 text-muted">
+                      Không có người dùng nào.
                     </td>
                   </tr>
                 ) : (
                   currentUsers.map(user => (
-                    <tr key={user.id} className="align-middle">
-                      <td className="text-center">
-                        <Badge
-                          bg="secondary"
-                          className="fw-bold"
-                          style={{
-                            fontSize: '0.85em',
-                            padding: '0.5em 0.8em',
-                            letterSpacing: '0.5px',
-                          }}
-                        >
-                          #{user.id}
-                        </Badge>
-                      </td>
-                      <td>
+                    <tr key={user.id}>
+                      <td className="border-0 fw-medium">#{user.id}</td>
+                      <td className="border-0">
                         <div className="d-flex align-items-center">
                           <div className="bg-light rounded-circle p-2 me-2">
                             <FaUserCircle size={22} className="text-primary" />
@@ -287,47 +233,24 @@ const UserManagementTable = ({ users, handleShowEdit, handleDelete, handleAddUse
                           </div>
                         </div>
                       </td>
-                      <td>
-                        <div className="text-truncate" style={{ maxWidth: 250 }}>
-                          <span className="text-muted">{user.email}</span>
-                        </div>
+                      <td className="border-0">
+                        <span className="text-muted">{user.email}</span>
                       </td>
-                      <td className="text-center">
+                      <td className="border-0 text-center">
                         {user.active ? (
-                          <Badge
-                            bg="success"
-                            className="d-inline-flex align-items-center gap-1 px-2 py-1"
-                            style={{ fontSize: '0.85em' }}
-                          >
-                            <FaCheckCircle size={12} />
-                            <span>Hoạt động</span>
-                          </Badge>
+                          <Badge bg="success" className="fw-normal">Hoạt động</Badge>
                         ) : (
-                          <Badge
-                            bg="danger"
-                            className="d-inline-flex align-items-center gap-1 px-2 py-1"
-                            style={{ fontSize: '0.85em' }}
-                          >
-                            <FaTimesCircle size={12} />
-                            <span>Khóa</span>
-                          </Badge>
+                          <Badge bg="danger" className="fw-normal">Khóa</Badge>
                         )}
                       </td>
-                      <td className="text-center">
-                        <Badge
-                          bg={user.role === 'admin' ? 'dark' : 'info'}
-                          className="px-2 py-1"
-                          style={{ fontSize: '0.85em' }}
-                        >
+                      <td className="border-0 text-center">
+                        <Badge bg={user.role === 'admin' ? 'dark' : 'info'} className="fw-normal">
                           {user.role === 'admin' ? 'Quản trị' : 'Người dùng'}
                         </Badge>
                       </td>
-                      <td>
+                      <td className="border-0 text-center">
                         <div className="d-flex justify-content-center gap-2">
-                          <OverlayTrigger
-                            placement="top"
-                            overlay={<Tooltip>Chỉnh sửa</Tooltip>}
-                          >
+                          <OverlayTrigger placement="top" overlay={<Tooltip>Chỉnh sửa</Tooltip>}>
                             <Button
                               variant="outline-primary"
                               size="sm"
@@ -338,10 +261,7 @@ const UserManagementTable = ({ users, handleShowEdit, handleDelete, handleAddUse
                               <FaEdit size={14} />
                             </Button>
                           </OverlayTrigger>
-                          <OverlayTrigger
-                            placement="top"
-                            overlay={<Tooltip>Xóa</Tooltip>}
-                          >
+                          <OverlayTrigger placement="top" overlay={<Tooltip>Xóa</Tooltip>}>
                             <Button
                               variant="outline-danger"
                               size="sm"
@@ -361,13 +281,19 @@ const UserManagementTable = ({ users, handleShowEdit, handleDelete, handleAddUse
             </Table>
           </div>
         </Card.Body>
-        
-        <Card.Footer className="bg-white py-3 px-3">
+
+        <Card.Footer className="bg-white border-0 px-4 py-2">
           <Row className="align-items-center">
-            <Col xs={12} md={6} className="mb-3 mb-md-0">
-              <div className="text-muted small">
+            <Col xs={12} md={6}>
+              <div className="text-muted" style={{ fontSize: '0.95rem' }}>
                 {filteredUsers.length > 0 ? (
-                  <>Hiển thị <span className="fw-semibold">{indexOfFirst + 1}</span> đến <span className="fw-semibold">{Math.min(indexOfLast, filteredUsers.length)}</span> trong tổng số <span className="fw-semibold">{filteredUsers.length}</span> người dùng</>
+                  <>
+                    Hiển thị <span className="fw-semibold" style={{ color: '#222' }}>{indexOfFirst + 1}</span>
+                    &nbsp;-&nbsp;
+                    <span className="fw-semibold" style={{ color: '#222' }}>{Math.min(indexOfLast, filteredUsers.length)}</span>
+                    &nbsp;trong&nbsp;
+                    <span className="fw-semibold" style={{ color: '#222' }}>{filteredUsers.length}</span> người dùng
+                  </>
                 ) : (
                   <>Không có người dùng nào</>
                 )}
@@ -375,25 +301,27 @@ const UserManagementTable = ({ users, handleShowEdit, handleDelete, handleAddUse
             </Col>
             <Col xs={12} md={6}>
               {totalPages > 0 && (
-                <Pagination className="mb-0 justify-content-md-end justify-content-center pagination-sm">
-                  <Pagination.First
-                    onClick={() => setCurrentPage(1)}
-                    disabled={currentPage === 1}
-                  />
-                  <Pagination.Prev
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                  />
-                  {getPaginationItems()}
-                  <Pagination.Next
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages || totalPages === 0}
-                  />
-                  <Pagination.Last
-                    onClick={() => setCurrentPage(totalPages)}
-                    disabled={currentPage === totalPages || totalPages === 0}
-                  />
-                </Pagination>
+                <div className="d-flex justify-content-md-end justify-content-start mt-2 mt-md-0">
+                  <Pagination className="mb-0 pagination-sm" style={{ background: 'transparent', borderRadius: 6, padding: 0 }}>
+                    <Pagination.First
+                      onClick={() => setCurrentPage(1)}
+                      disabled={currentPage === 1}
+                    />
+                    <Pagination.Prev
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                    />
+                    {getPaginationItems()}
+                    <Pagination.Next
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages || totalPages === 0}
+                    />
+                    <Pagination.Last
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={currentPage === totalPages || totalPages === 0}
+                    />
+                  </Pagination>
+                </div>
               )}
             </Col>
           </Row>
@@ -402,5 +330,42 @@ const UserManagementTable = ({ users, handleShowEdit, handleDelete, handleAddUse
     </Container>
   );
 };
-
 export default UserManagementTable;
+// Quản lý bảng người dùng (User Management Table)
+// Mô tả: Component hiển thị danh sách người dùng với các chức năng phân trang và hiển thị thông tin chi tiết
+// Các chức năng chính:
+// - Hiển thị danh sách người dùng theo trang
+// - Hỗ trợ phân trang với các nút điều hướng (First, Prev, Next, Last)
+// - Displays the number of selected users
+// Pagination Footer Component
+// Mô tả: Footer của bảng quản lý người dùng, hiển thị thông tin phân trang và điều hướng
+// Các chức năng chính:
+// - Hiển thị khoảng người dùng hiện tại trên trang
+// - Cung cấp các nút điều hướng phân trang (First, Previous, Next, Last)
+// - Hỗ trợ trạng thái disabled cho các nút khi ở đầu/cuối danh sách
+
+// Props chính:
+// - filteredUsers: Mảng người dùng đã được lọc
+// - indexOfFirst: Chỉ số người dùng đầu tiên của trang hiện tại
+// - indexOfLast: Chỉ số người dùng cuối cùng của trang hiện tại
+// - currentPage: Trang hiện tại
+// - totalPages: Tổng số trang
+// - setCurrentPage: Hàm cập nhật trang hiện tại
+
+// Cấu trúc:
+// - Sử dụng Card.Footer từ React Bootstrap
+// - Layout responsive với Row và Col
+// - Pagination được điều chỉnh kích thước và vị trí
+// - Hiển thị thông tin số lượng người dùng được chọn
+// - Hỗ trợ hiển thị khoảng người dùng hiện tại
+
+// Các props và state quan trọng:
+// - filteredUsers: Mảng người dùng đã được lọc
+// - currentPage: Trang hiện tại
+// - totalPages: Tổng số trang
+// - indexOfFirst, indexOfLast: Chỉ số người dùng đầu và cuối của trang hiện tại
+
+// Các thành phần con:
+// - Table: Bảng hiển thị danh sách người dùng
+// - Pagination: Điều khiển phân trang
+// - Card, Card.Body, Card.Footer: Cấu trúc bố cục component

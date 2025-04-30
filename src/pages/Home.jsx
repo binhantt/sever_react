@@ -4,12 +4,19 @@ import Layout from '../components/layout/Layout';
 import RecentOrders from '../components/dashboard/RecentOrders';
 import HomeStats from '../components/home/HomeStats';
 import HomeCharts from '../components/home/HomeCharts';
-import HomeBreadcrumb from '../components/home/HomeBreadcrumb';
+import Breadcrumb from '../components/common/Breadcrumb';
+import { FaHome } from 'react-icons/fa';
 
 const Home = () => {
   return (
     <Layout>
-      <HomeBreadcrumb />
+      <Breadcrumb 
+        title="Dashboard" 
+        icon={FaHome}
+        items={[
+          { label: "Dashboard", active: true }
+        ]}
+      />
       <HomeStats />
       <HomeCharts />
       <Row>

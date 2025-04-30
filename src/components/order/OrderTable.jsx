@@ -1,165 +1,81 @@
-
 import React from 'react';
-import {
-  Card,
-  Table,
-  Button,
-  Badge,
-  Stack,
-  Container,
-  Row,
-  Col,
-  OverlayTrigger,
-  Tooltip,
-} from 'react-bootstrap';
-import {
-  FaEdit,
-  FaTrash,
-  FaUserCircle,
-  FaSort,
-  FaCheckCircle,
-  FaTimesCircle,
-} from 'react-icons/fa';
+import { Card, Table, Badge, Container, Button } from 'react-bootstrap';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 
-const UserManagementTable = ({ users, handleShowEdit, handleDelete }) => {
+/**
+ * OrderTable Component
+ * 
+ * Renders a responsive table displaying recent orders with various details
+ * 
+ * @component
+ * @param {Object[]} orders - Array of order objects to be displayed
+ * @param {string} orders[].id - Unique identifier for the order
+ * @param {string} orders[].customer - Name of the customer
+ * @param {string} orders[].date - Date of the order
+ * @param {string} orders[].status - Current status of the order
+ * @param {number} orders[].total - Total amount of the order
+ * 
+ * @returns {React.ReactElement} A table of orders with status badges and responsive design
+ * 
+ *
+ */
+const OrderTable = ({ orders = [] }) => {
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'Đã giao':
+        return <Badge bg="success">Đã giao</Badge>;
+      case 'Đang giao':
+        return <Badge bg="primary">Đang giao</Badge>;
+      case 'Chờ xử lý':
+        return <Badge bg="warning" text="dark">Chờ xử lý</Badge>;
+      case 'Đã hủy':
+        return <Badge bg="danger">Đã hủy</Badge>;
+      default:
+        return <Badge bg="secondary">Không rõ</Badge>;
+    }
+  };
+
   return (
-    <Container fluid className="p-0">
+    <Container fluid className="p-0 mt-4">
       <Card className="shadow-sm border-0">
-        <Card.Header className="bg-primary text-white py-3">
-          <Row className="align-items-center">
-            <Col>
-              <h5 className="mb-0 fw-bold">Quản lý người dùng</h5>
-            </Col>
-          </Row>
+        <Card.Header className="bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+          <h6 className="mb-0 fw-bold">Đơn hàng gần đây</h6>
+          <a href="/orders" className="text-primary small">Xem tất cả</a>
         </Card.Header>
         <Card.Body className="p-0">
-          <Table hover responsive className="mb-0 align-middle">
+          <Table hover responsive className="mb-0">
             <thead className="bg-light">
               <tr>
-                <th className="text-center" style={{ width: 60 }}>
-                  <Stack direction="horizontal" gap={1} className="justify-content-center">
-                    <span className="small fw-semibold">ID</span>
-                    <FaSort size={10} className="text-muted" />
-                  </Stack>
-                </th>
-                <th>
-                  <Stack direction="horizontal" gap={1}>
-                    <span className="small fw-semibold">Thông tin</span>
-                    <FaSort size={10} className="text-muted" />
-                  </Stack>
-                </th>
-                <th>
-                  <Stack direction="horizontal" gap={1}>
-                    <span className="small fw-semibold">Email</span>
-                    <FaSort size={10} className="text-muted" />
-                  </Stack>
-                </th>
-                <th className="text-center">
-                  <Stack direction="horizontal" gap={1} className="justify-content-center">
-                    <span className="small fw-semibold">Trạng thái</span>
-                    <FaSort size={10} className="text-muted" />
-                  </Stack>
-                </th>
-                <th className="text-center">
-                  <Stack direction="horizontal" gap={1} className="justify-content-center">
-                    <span className="small fw-semibold">Chức danh</span>
-                    <FaSort size={10} className="text-muted" />
-                  </Stack>
-                </th>
-                <th className="text-center">
-                  <span className="small fw-semibold">Hành động</span>
-                </th>
+                <th className="align-middle">Mã đơn</th>
+                <th className="align-middle">Khách hàng</th>
+                <th className="align-middle">Ngày đặt</th>
+                <th className="align-middle">Trạng thái</th>
+                <th className="align-middle text-end">Tổng tiền</th>
+                <th className="align-middle text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {users.length === 0 ? (
+              {orders.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center py-4 text-muted">
-                    Không có người dùng nào.
+                    Không có đơn hàng nào.
                   </td>
                 </tr>
               ) : (
-                users.map(user => (
-                  <tr key={user.id} className="align-middle">
-                    <td className="text-center">
-                      <Badge
-                        bg="secondary"
-                        className="fw-bold"
-                        style={{
-                          fontSize: '0.95em',
-                          padding: '0.5em 0.8em',
-                          letterSpacing: '0.5px',
-                        }}
-                      >
-                        #{user.id}
-                      </Badge>
-                    </td>
-                    <td>
-                      <Stack direction="horizontal" gap={2}>
-                        <FaUserCircle size={22} color="#6c757d" />
-                        <span className="fw-semibold">{user.name}</span>
-                      </Stack>
-                    </td>
-                    <td className="text-truncate" style={{ maxWidth: 180 }}>
-                      <span className="text-muted">{user.email}</span>
-                    </td>
-                    <td className="text-center">
-                      {user.active ? (
-                        <Badge
-                          bg="success"
-                          className="d-inline-flex align-items-center gap-1 px-2 py-1"
-                          style={{ fontSize: '0.95em' }}
-                        >
-                          <FaCheckCircle size={13} className="me-1" />
-                          Hoạt động
-                        </Badge>
-                      ) : (
-                        <Badge
-                          bg="danger"
-                          className="d-inline-flex align-items-center gap-1 px-2 py-1"
-                          style={{ fontSize: '0.95em' }}
-                        >
-                          <FaTimesCircle size={13} className="me-1" />
-                          Khóa
-                        </Badge>
-                      )}
-                    </td>
-                    <td className="text-center">
-                      <Badge
-                        bg={user.role === 'admin' ? 'dark' : 'info'}
-                        className="px-2 py-1"
-                        style={{ fontSize: '0.95em' }}
-                      >
-                        {user.role === 'admin' ? 'Quản trị' : 'Người dùng'}
-                      </Badge>
-                    </td>
-                    <td className="text-center">
-                      <Stack direction="horizontal" gap={2} className="justify-content-center">
-                        <OverlayTrigger
-                          placement="top"
-                          overlay={<Tooltip>Chỉnh sửa</Tooltip>}
-                        >
-                          <Button
-                            variant="outline-primary"
-                            size="sm"
-                            onClick={() => handleShowEdit(user)}
-                          >
-                            <FaEdit size={14} />
-                          </Button>
-                        </OverlayTrigger>
-                        <OverlayTrigger
-                          placement="top"
-                          overlay={<Tooltip>Xóa</Tooltip>}
-                        >
-                          <Button
-                            variant="outline-danger"
-                            size="sm"
-                            onClick={() => handleDelete(user.id)}
-                          >
-                            <FaTrash size={14} />
-                          </Button>
-                        </OverlayTrigger>
-                      </Stack>
+                orders.map(order => (
+                  <tr key={order.id}>
+                    <td className="align-middle"><strong>#{order.id}</strong></td>
+                    <td className="align-middle">{order.customer}</td>
+                    <td className="align-middle">{order.date}</td>
+                    <td className="align-middle">{getStatusBadge(order.status)}</td>
+                    <td className="align-middle text-end">{order.total.toLocaleString()}đ</td>
+                    <td className="align-middle text-center">
+                      <Button variant="outline-primary" size="sm" className="me-1">
+                        <FaEdit />
+                      </Button>
+                      <Button variant="outline-danger" size="sm">
+                        <FaTrash />
+                      </Button>
                     </td>
                   </tr>
                 ))
@@ -172,4 +88,4 @@ const UserManagementTable = ({ users, handleShowEdit, handleDelete }) => {
   );
 };
 
-export default UserManagementTable;
+export default OrderTable;
