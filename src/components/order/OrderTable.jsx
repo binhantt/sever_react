@@ -48,6 +48,7 @@ const OrderTable = ({ orders = [], onEdit, onDelete }) => {
               <tr>
                 <th className="align-middle">Mã đơn</th>
                 <th className="align-middle">Khách hàng</th>
+                <th className="align-middle">Sản phẩm</th>
                 <th className="align-middle">Ngày đặt</th>
                 <th className="align-middle">Trạng thái</th>
                 <th className="align-middle text-end">Tổng tiền</th>
@@ -66,6 +67,9 @@ const OrderTable = ({ orders = [], onEdit, onDelete }) => {
                   <tr key={order.id}>
                     <td className="align-middle"><strong>#{order.id}</strong></td>
                     <td className="align-middle">{order.customer}</td>
+                    <td className="align-middle">
+                      {order.products?.map(p => `${p.name} (x${p.quantity})`).join(', ') || 'Không có'}
+                    </td>
                     <td className="align-middle">{order.date}</td>
                     <td className="align-middle">{getStatusBadge(order.status)}</td>
                     <td className="align-middle text-end">{order.total.toLocaleString()}đ</td>

@@ -6,7 +6,11 @@ export const ordersData = [
     address: '123 Đường ABC, Quận 1, TP.HCM',
     date: '2023-05-15', 
     status: 'Đã giao', 
-    total: 1200000 
+    total: 1200000,
+    products: [
+      { id: 1, name: 'iPhone 13', price: 1000000, quantity: 1 },
+      { id: 2, name: 'AirPods Pro', price: 200000, quantity: 1 }
+    ]
   },
   { id: 2, customer: 'Tran Thi B', date: '2023-05-16', status: 'Đang giao', total: 850000 },
   { id: 3, customer: 'Le Van C', date: '2023-05-17', status: 'Chờ xử lý', total: 450000 },

@@ -2,14 +2,23 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Card } from 'react-bootstrap';
 import { Logo } from '../components/common/Logo';
 import LoginForm from '../components/login/LoginForm';
+import { ToastContainer, toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { loginSuccess, loginFailure } from '../store/Slice/Login';
+import axios from 'axios';
+import ApiConfig from '../config/Api.config';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevState => ({
@@ -18,9 +27,27 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    try {
+      const response = await axios.post(`${ApiConfig.severAdmin}${ApiConfig.login}`, formData);
+
+
+      if (response.data.data.user?.role === 'admin') {
+        localStorage.setItem('user', JSON.stringify(response.data.data.user));
+        dispatch(loginSuccess(response.data));
+        toast.success('Đăng nhập thành công');
+        navigate('/home');
+      } else {
+        const errorMsg = response.data.message || 'Chỉ admin mới được phép truy cập';
+        dispatch(loginFailure({ message: errorMsg }));
+        toast.error(errorMsg);
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || 'Đăng nhập thất bại';
+      dispatch(loginFailure({ message: errorMsg }));
+      toast.error(errorMsg);
+    }
   };
 
   return (
@@ -31,6 +58,17 @@ const Login = () => {
       backgroundColor: '#f1f4f9',
       padding: '2rem 0'
     }}>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <Container>
         <Row className="justify-content-center">
           <Col xs={12} sm={10} md={8} lg={5} xl={4}>
@@ -56,6 +94,7 @@ const Login = () => {
             </Card>
           </Col>
         </Row>
+        
       </Container>
     </div>
   );

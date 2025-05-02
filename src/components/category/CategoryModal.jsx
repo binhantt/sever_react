@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button } from 'react-bootstrap';
 
 const CategoryModal = ({ 
@@ -9,14 +9,33 @@ const CategoryModal = ({
   isEditing = false 
 }) => {
   const [formData, setFormData] = useState({
-    name: category?.name || '',
-    description: category?.description || '',
-    active: category?.active ?? true
+    name: '',
+    description: '',
+    active: true
   });
 
+  useEffect(() => {
+    if (category) {
+      setFormData({
+        name: category.name,
+        description: category.description,
+        active: category.active
+      });
+    } else {
+      setFormData({
+        name: '',
+        description: '',
+        active: true
+      });
+    }
+  }, [category?.id]); // Changed to only depend on category.id instead of whole category object
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ 
+      ...prev, 
+      [name]: type === 'checkbox' ? checked : value 
+    }));
   };
 
   return (
@@ -49,7 +68,7 @@ const CategoryModal = ({
               onChange={handleChange}
             />
           </Form.Group>
-          
+         
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>

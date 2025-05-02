@@ -7,7 +7,8 @@ const BaseModal = ({
   handleClose, 
   title,
   children,
-  submitText = 'Lưu'
+  submitText = 'Lưu',
+  onSubmit
 }) => {
   return (
     <Modal show={show} onHide={handleClose}>
@@ -19,7 +20,12 @@ const BaseModal = ({
         <Button variant="secondary" onClick={handleClose}>
           Hủy
         </Button>
-        <Button variant="primary" type="submit">
+        <Button 
+          variant="primary" 
+          type="submit"
+          form="order-form"
+          onClick={onSubmit}
+        >
           {submitText}
         </Button>
       </Modal.Footer>

@@ -13,15 +13,11 @@ import OrderModal from '../components/order/OrderModal';
 const Order = () => {
   const [showModal, setShowModal] = useState(false);
   const [currentOrder, setCurrentOrder] = useState(null);
-
-  const handleEdit = (order) => {
-    setCurrentOrder(order);
-    setShowModal(true);
-  };
+  const [orders, setOrders] = useState(ordersData); // Add this line to manage orders state
+  const [formData, setFormData] = useState({});
 
   const handleDelete = async (orderId) => {
     try {
-      // Hiển thị confirm dialog đẹp hơn
       toast.info(<div>
         <h6>Xác nhận xóa</h6>
         <p>Bạn có chắc muốn xóa đơn hàng #{orderId}?</p>
@@ -39,8 +35,7 @@ const Order = () => {
             size="sm"
             onClick={async () => {
               toast.dismiss();
-              // Thực hiện xóa
-              console.log('Deleting order:', orderId);
+              setOrders(orders.filter(order => order.id !== orderId)); // Change setOrdersData to setOrders
               toast.success(`Đã xóa đơn hàng #${orderId} thành công!`);
             }}
           >
@@ -57,11 +52,44 @@ const Order = () => {
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Xử lý thêm/sửa đơn hàng
+  const handleEdit = (order) => {
+    setCurrentOrder(order);
+
+    setFormData({
+      customer: order.customer,
+      phone: order.phone,
+      address: order.address,
+      status: order.status,
+      total: order.total,
+      products: order.products
+    });
+    setShowModal(true);
+  };
+
+  const handleSubmit = (formData) => {
+    if (currentOrder) {
+      setOrders(orders.map(order => 
+        order.id === currentOrder.id ? { 
+          ...order, 
+          customer: formData.customer,
+          phone: formData.phone,
+          address: formData.address,
+          status: formData.status,
+          total: formData.total,
+          products: formData.products
+        } : order
+      ));
+      toast.success('Đã cập nhật đơn hàng thành công!');
+    } else {
+      const newId = orders.length > 0 ? Math.max(...orders.map(o => o.id)) + 1 : 1;
+      setOrders([...orders, { 
+        id: newId, 
+        ...formData
+      }]);
+      toast.success('Đã thêm đơn hàng mới thành công!');
+    }
     setShowModal(false);
-    toast.success(`Đã ${currentOrder ? 'cập nhật' : 'thêm'} đơn hàng thành công!`);
+    setCurrentOrder(null);
   };
 
   return (
@@ -97,7 +125,7 @@ const Order = () => {
         <Row>
           <Col xs={12}>
             <OrderTable 
-              orders={ordersData} 
+              orders={orders}  // Thay ordersData bằng orders
               onEdit={handleEdit}
               onDelete={handleDelete}
             />

@@ -42,7 +42,7 @@ const Product = () => {
               size="sm"
               onClick={() => {
                 toast.dismiss();
-                onDelete(productId);
+                setProducts(products.filter(product => product.id !== productId)); // Changed from onDelete to setProducts
                 toast.success('Đã xóa sản phẩm thành công!');
               }}
             >
