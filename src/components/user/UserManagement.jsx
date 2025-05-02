@@ -1,77 +1,136 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Toast } from 'react-bootstrap';
 import UserManagementTable from './UserManagementTable';
 import UserManagementModal from './UserManagementModal';
-import defaultUsers from '../../config/data/UserConfig';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  fetchUsers,
+  updateUser,
+  deleteUser
+} from '../../store/Api/User.Api';
+import {
+  setCurrentUser,
+  clearErrors
+} from '../../store/Slice/User.Slice';
 
 const UserManagement = () => {
-  const [users, setUsers] = useState(defaultUsers);
+  const dispatch = useDispatch();
+  const {
+    users,
+    currentUser,
+
+  } = useSelector(state => state.user);
+
   const [showModal, setShowModal] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0
+  });
 
+  useEffect(() => {
+    dispatch(fetchUsers({
+      page: pagination.page,
+      limit: pagination.limit
+    })).then((action) => {
+      if (action.payload) {
+        setPagination(prev => ({
+          ...prev,
+          total: action.payload.totalCount || 0
+        }));
+      }
+    });
+  }, [dispatch, pagination.page, pagination.limit]);
+
+  const handlePageChange = (newPage, newLimit) => {
+    setPagination(prev => ({
+      ...prev,
+      page: newPage,
+      limit: newLimit
+    }));
+  };
   const handleClose = () => {
     setShowModal(false);
-    setCurrentUser(null);
+    dispatch(setCurrentUser(null));
+    dispatch(clearErrors());
   };
 
   const handleShowAdd = () => {
     setShowModal(true);
-    setCurrentUser(null);
+    dispatch(setCurrentUser(null));
   };
-
+  console.log('Dữ liệu người dùng hiện tại:', currentUser);
   const handleShowEdit = (user) => {
+    console.log('Dữ liệu user khi click edit:', user);
     setShowModal(true);
-    setCurrentUser(user);
+    dispatch(setCurrentUser(user));
   };
 
   const handleDelete = (id) => {
-    setUsers(users.filter(user => user.id !== id));
-    setToastMessage('Xóa người dùng thành công!');
-    setShowToast(true);
+    dispatch(deleteUser(id))
+      .then(() => {
+        setToastMessage('Xóa người dùng thành công!');
+        setShowToast(true);
+      });
   };
 
   const handleSubmit = (formData) => {
+    console.log('Dữ liệu người dùng trước khi cập nhật:', currentUser);
+    console.log('Dữ liệu mới sẽ được cập nhật:', formData);
+
     if (currentUser) {
-      setUsers(users.map(user => 
-        user.id === currentUser.id ? { ...user, ...formData } : user
-      ));
-      setToastMessage('Cập nhật người dùng thành công!');
+      dispatch(updateUser({ id: currentUser.id, userData: formData }))
+        .then((result) => {
+          console.log('Kết quả sau khi cập nhật:', result);
+          setToastMessage('Cập nhật người dùng thành công!');
+          setShowToast(true);
+          handleClose();
+        })
+        .catch((error) => {
+          console.error('Lỗi khi cập nhật:', error);
+        });
     } else {
-      const newId = users.length > 0 ? users[users.length - 1].id + 1 : 1;
-      setUsers([...users, { id: newId, ...formData }]);
-      setToastMessage('Thêm người dùng thành công!');
+      dispatch(createUser(formData))
+        .then(() => {
+          setToastMessage('Thêm người dùng thành công!');
+          setShowToast(true);
+          handleClose();
+        });
     }
-    handleClose();
-    setShowToast(true);
   };
 
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h3>Quản lý người dùng</h3>
-      
+        <Button variant="primary" onClick={handleShowAdd}>
+          Thêm người dùng
+        </Button>
       </div>
-      
-      <UserManagementTable 
-        users={users} 
-        handleShowEdit={handleShowEdit} 
-        handleDelete={handleDelete} 
+
+      <UserManagementTable
+        users={users}
+        handleShowEdit={handleShowEdit}
+        handleDelete={handleDelete}
+        pagination={pagination}
+        setPagination={handlePageChange}  // Thay đổi này
       />
-      
+
       <UserManagementModal
         show={showModal}
         handleClose={handleClose}
         handleSubmit={handleSubmit}
-        user={currentUser}
+
+        user={currentUser} // Truyền dữ liệu user từ Redux store
         isEditing={!!currentUser}
       />
-      
-      <Toast 
-        show={showToast} 
-        onClose={() => setShowToast(false)} 
-        delay={3000} 
+
+      <Toast
+        show={showToast}
+        onClose={() => setShowToast(false)}
+        delay={3000}
         autohide
         className="position-fixed bottom-0 end-0 m-3"
       >

@@ -28,36 +28,18 @@ import {
   FaEllipsisH,
 } from 'react-icons/fa';
 
-/**
- * UserManagementTable - Component quản lý bảng người dùng
- * 
- * @component
- * @description Hiển thị danh sách người dùng với các chức năng nâng cao
- * 
- * @prop {Array} users - Danh sách người dùng
- * @prop {Function} handleShowEdit - Hàm mở modal chỉnh sửa người dùng
- * @prop {Function} handleDelete - Hàm xóa người dùng
- * @prop {Function} handleAddUser - Hàm thêm người dùng mới
- * 
- * @features
- * - Tìm kiếm người dùng theo tên, email, ID
- * - Sắp xếp người dùng theo nhiều tiêu chí
- * - Phân trang linh hoạt
- * - Hiển thị trạng thái và vai trò người dùng
- * 
- * @state
- * - searchTerm: Từ khóa tìm kiếm
- * - perPage: Số lượng người dùng trên mỗi trang
- * - currentPage: Trang hiện tại
- * - sortField: Trường sắp xếp
- * - sortDirection: Hướng sắp xếp
- */
+
 const UserManagementTable = ({ 
   users = [], 
   handleShowEdit, 
   handleDelete, 
-  handleAddUser 
+  handleAddUser,
+  pagination,
+  setPagination
 }) => {
+  // Convert users to array if it's an object
+  const usersArray = Array.isArray(users) ? users : [users];
+  
   // State for search, pagination, per page
   const [searchTerm, setSearchTerm] = useState('');
   const [perPage, setPerPage] = useState(5);
@@ -65,18 +47,8 @@ const UserManagementTable = ({
   const [sortField, setSortField] = useState('id');
   const [sortDirection, setSortDirection] = useState('asc');
 
-  // Handle sorting
-  const handleSort = (field) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
-
   // Filter users by name, email, id
-  const filteredUsers = users.filter(user =>
+  const filteredUsers = usersArray.filter(user =>
     user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.id?.toString().includes(searchTerm)

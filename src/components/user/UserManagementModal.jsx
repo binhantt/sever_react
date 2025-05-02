@@ -8,12 +8,13 @@ const UserManagementModal = ({
   user = null,
   isEditing = false 
 }) => {
+  console.log('Dữ liệu user nhận được:', user); // Thêm dòng này
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    role: user?.role || 'user',
-    active: user?.active ?? true
+    name: user?.name || '',  // Hiển thị tên
+    email: user?.email || '', // Hiển thị email
+    phone: user?.phone || '', // Hiển thị số điện thoại
+    role: user?.role || 'user', // Hiển thị vai trò
+    active: user?.active ?? true // Hiển thị trạng thái
   });
 
   const handleChange = (e) => {
@@ -28,6 +29,7 @@ const UserManagementModal = ({
       </Modal.Header>
       <Form onSubmit={(e) => {
         e.preventDefault();
+        console.log(`Dữ liệu ${isEditing ? 'cập nhật' : 'thêm mới'} người dùng:`, formData);
         handleSubmit(formData);
       }}>
         <Modal.Body>
@@ -36,7 +38,7 @@ const UserManagementModal = ({
             <Form.Control
               type="text"
               name="name"
-              value={formData.name}
+              value={formData.name}  // Hiển thị giá trị từ formData
               onChange={handleChange}
               required
             />
