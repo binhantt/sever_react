@@ -11,6 +11,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { loginSuccess } from './store/Slice/Login';
 import Logout from './pages/Logout';
 import CategoryList from './components/category/CategoryList';
+import ProductIntro from './pages/ProductIntro';
 
 function App() {
   const { user } = useSelector(state => state.admin);
@@ -53,6 +54,10 @@ function App() {
           element={user ? <Stats /> : <Navigate to="/" />} 
         />
         <Route path="/logout" element={<Logout />} />
+        <Route 
+          path="/product-intros" 
+          element={user ? <ProductIntro /> : <Navigate to="/" />} 
+        />
       </Routes>
     </Router>
   );

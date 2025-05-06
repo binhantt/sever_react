@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button } from 'react-bootstrap';
+import ImgBBConfig from '../../config/ImgBB.config';
 
 const CategoryModal = ({ 
   show, 
@@ -10,32 +11,65 @@ const CategoryModal = ({
 }) => {
   const [formData, setFormData] = useState({
     name: '',
-    description: '',
-    active: true
+    active: true,
+    image: ''
   });
+
+  // Add this missing function
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   useEffect(() => {
     if (category) {
       setFormData({
-        name: category.name,
-        description: category.description,
-        active: category.active
+        name: category.name || '',
+        description: category.description || '',
+        active: category.active !== false,
+        image: category.image || '',
       });
     } else {
       setFormData({
         name: '',
         description: '',
-        active: true
+        active: true,
+        image: '',
+        image_url: ''
       });
     }
-  }, [category?.id]); // Changed to only depend on category.id instead of whole category object
+  }, [category]);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({ 
-      ...prev, 
-      [name]: type === 'checkbox' ? checked : value 
-    }));
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const response = await axios.post(
+        `${ImgBBConfig.uploadUrl}?key=${ImgBBConfig.apiKey}`, 
+        formData, 
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+      setFormData(prev => ({ 
+        ...prev, 
+        image: response.data.data.url,
+        image_url: response.data.data.url 
+      }));
+    } catch (error) {
+      console.error('Upload failed:', error);
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -59,16 +93,33 @@ const CategoryModal = ({
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Mô tả</Form.Label>
+            <Form.Label>Image Ảnh</Form.Label>
             <Form.Control
-              as="textarea"
-              rows={3}
-              name="description"
-              value={formData.description}
+              type="text"
+              name="name"
+              value={formData.image}
               onChange={handleChange}
+              required
             />
           </Form.Group>
-         
+          <Form.Group className="mb-3">
+            <Form.Label>Ảnh danh mục</Form.Label>
+            <Form.Control 
+              type="file" 
+              accept="image/*"
+              onChange={handleImageUpload}
+              disabled={uploading}
+            />
+            {formData.image_url && (
+              <div className="mt-2">
+                <img 
+                  src={formData.image_url} 
+                  alt="Preview" 
+                  style={{ maxWidth: '100px', marginRight: '10px' }}
+                />
+              </div>
+            )}
+          </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>

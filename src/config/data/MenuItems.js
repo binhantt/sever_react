@@ -1,4 +1,4 @@
-import { FaHome, FaUsers, FaShoppingCart, FaClipboardList, FaChartBar, FaCog } from 'react-icons/fa';
+import { FaHome, FaUsers, FaShoppingCart, FaClipboardList, FaChartBar, FaCog, FaInfoCircle } from 'react-icons/fa';
 
 const menuItems = [
   {
@@ -9,7 +9,7 @@ const menuItems = [
   {
     path: "/categories",
     name: "Danh mục sản phẩm",
-    icon: { component: FaClipboardList, size: 16 } // hoặc thay bằng icon khác nếu bạn thích
+    icon: { component: FaClipboardList, size: 16 }
   },
   {
     path: "/users",
@@ -27,11 +27,15 @@ const menuItems = [
     icon: { component: FaClipboardList, size: 16 }
   },
   {
+    path: "/product-intros",
+    name: "Giới thiệu sản phẩm", 
+    icon: { component: FaInfoCircle, size: 16 }
+  },
+  {
     path: "/analytics",
     name: "Thống kê",
     icon: { component: FaChartBar, size: 16 }
   },
-
   {
     path: "/settings",
     name: "Cài đặt",

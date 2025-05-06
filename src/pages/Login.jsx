@@ -33,16 +33,12 @@ const Login = () => {
       const response = await axios.post(`${ApiConfig.severAdmin}${ApiConfig.login}`, formData);
 
 
-      if (response.data.data.user?.role === 'admin') {
+    
         localStorage.setItem('user', JSON.stringify(response.data.data.user));
         dispatch(loginSuccess(response.data));
         toast.success('Đăng nhập thành công');
         navigate('/home');
-      } else {
-        const errorMsg = response.data.message || 'Chỉ admin mới được phép truy cập';
-        dispatch(loginFailure({ message: errorMsg }));
-        toast.error(errorMsg);
-      }
+      
     } catch (error) {
       const errorMsg = error.response?.data?.message || 'Đăng nhập thất bại';
       dispatch(loginFailure({ message: errorMsg }));

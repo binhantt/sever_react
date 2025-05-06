@@ -9,7 +9,7 @@ const CategoryList = ({ categories = [], onEdit, onDelete }) => {
         <tr>
           <th>ID</th>
           <th>Tên danh mục</th>
-          <th>Mô tả</th>
+          <th>Img</th>
          
           <th>Thao tác</th>
         </tr>
@@ -26,10 +26,19 @@ const CategoryList = ({ categories = [], onEdit, onDelete }) => {
             <tr key={category.id}>
               <td>{category.id}</td>
               <td>
+             
                 <div className="fw-semibold">{category.name}</div>
                 <div className="small text-muted">{category.description}</div>
               </td>
-              <td>{category.description}</td>
+              <td>
+              {category.image && (
+                  <img 
+                    src={category.image} 
+                    alt={category.name}
+                    style={{ width: '50px', marginRight: '10px' }}
+                  />
+                )}
+              </td>
              
               <td className="text-center">
                 <Button 

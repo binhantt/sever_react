@@ -6,7 +6,12 @@ export const loginAdmin = createAsyncThunk(
   'admin/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${ApiConfig.severAdmin}/login`, credentials);
+      const response = await axios.post(`${ApiConfig.severAdmin}/login`, credentials, {
+        withCredentials: true, // Equivalent to 'credentials: include'
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       if (response.data.user?.role !== 'admin') {
         return rejectWithValue({ message: 'Access denied - Admin only' });
       }
