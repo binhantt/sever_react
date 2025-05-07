@@ -9,27 +9,27 @@ const CategoryModal = ({
   category = null,
   isEditing = false 
 }) => {
+ 
+  
   const [formData, setFormData] = useState({
     name: '',
     active: true,
     image: ''
   });
 
-  // Add this missing function
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
   useEffect(() => {
+    // console.log('Category changed:', category);
     if (category) {
-      setFormData({
+      const newData = {
         name: category.name || '',
         description: category.description || '',
         active: category.active !== false,
         image: category.image || '',
-      });
+      };
+      // console.log('Setting form data from category:', newData);
+      setFormData(newData);
     } else {
+      console.log('Initializing empty form data');
       setFormData({
         name: '',
         description: '',
@@ -40,10 +40,17 @@ const CategoryModal = ({
     }
   }, [category]);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    console.log('Field changed:', name, value);
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   const [uploading, setUploading] = useState(false);
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
+    console.log('Image selected:', file?.name);
     if (!file) return;
 
     setUploading(true);
@@ -51,6 +58,7 @@ const CategoryModal = ({
     formData.append('image', file);
 
     try {
+      console.log('Uploading image to ImgBB');
       const response = await axios.post(
         `${ImgBBConfig.uploadUrl}?key=${ImgBBConfig.apiKey}`, 
         formData, 
@@ -60,6 +68,7 @@ const CategoryModal = ({
           }
         }
       );
+      console.log('Upload successful:', response.data.data.url);
       setFormData(prev => ({ 
         ...prev, 
         image: response.data.data.url,
@@ -79,6 +88,7 @@ const CategoryModal = ({
       </Modal.Header>
       <Form onSubmit={(e) => {
         e.preventDefault();
+        console.log('Submitting form data:', formData);
         handleSubmit(formData);
       }}>
         <Modal.Body>
@@ -86,17 +96,17 @@ const CategoryModal = ({
             <Form.Label>Tên danh mục</Form.Label>
             <Form.Control
               type="text"
-              name="name"
+              name="name"  // Giữ nguyên cho trường tên
               value={formData.name}
               onChange={handleChange}
               required
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Image Ảnh</Form.Label>
+            <Form.Label>Image URL</Form.Label>
             <Form.Control
               type="text"
-              name="name"
+              name="image"  // Đổi từ imageUrl thành image để khớp với state
               value={formData.image}
               onChange={handleChange}
               required

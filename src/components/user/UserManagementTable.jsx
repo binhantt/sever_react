@@ -31,11 +31,13 @@ import {
 
 const UserManagementTable = ({ 
   users = [], 
-  handleShowEdit, 
-  handleDelete, 
+  handleShowEdit = () => {}, // Thêm giá trị mặc định
+  handleDelete = ()=>{}, // Thêm giá trị mặc định 
   handleAddUser,
   pagination,
-  setPagination
+  setPagination,
+
+  currentUser = null 
 }) => {
   // Convert users to array if it's an object
   const usersArray = Array.isArray(users) ? users : [users];
@@ -218,6 +220,7 @@ const UserManagementTable = ({
                         size="sm" 
                         className="me-2"
                         onClick={() => handleShowEdit(user)}
+                        disabled={user.role === 'admin' && currentUser?.role !== 'admin'}
                       >
                         <FaEdit />
                       </Button>
@@ -225,6 +228,7 @@ const UserManagementTable = ({
                         variant="outline-danger" 
                         size="sm"
                         onClick={() => handleDelete(user.id)}
+                        disabled={user.role === 'admin' && currentUser?.role !== 'admin'}
                       >
                         <FaTrash />
                       </Button>

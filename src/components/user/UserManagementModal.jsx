@@ -8,28 +8,35 @@ const UserManagementModal = ({
   user = null,
   isEditing = false 
 }) => {
-  console.log('Dữ liệu user nhận được:', user); // Thêm dòng này
-  const [formData, setFormData] = useState({
-    name: user?.name || '',  // Hiển thị tên
-    email: user?.email || '', // Hiển thị email
-    phone: user?.phone || '', // Hiển thị số điện thoại
-    role: user?.role || 'user', // Hiển thị vai trò
-    active: user?.active ?? true // Hiển thị trạng thái
+  // Chỉ khởi tạo formData từ user nếu có ID (chế độ edit)
+  const [formData, setFormData] = useState(isEditing && user?.id ? {
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+    active: user.active ?? true
+  } : {
+    name: '',
+    email: '',
+    phone: '',
+    role: 'user',
+    active: true
   });
-
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    const newValue = type === 'checkbox' ? checked : value;
+    setFormData(prev => {
+      const newState = { ...prev, [name]: newValue };
+      console.log('Form state changed:', { field: name, value: newValue, newState });
+      return newState;
+    });
   };
 
   return (
     <Modal show={show} onHide={handleClose} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>{isEditing ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'}</Modal.Title>
-      </Modal.Header>
       <Form onSubmit={(e) => {
         e.preventDefault();
-        console.log(`Dữ liệu ${isEditing ? 'cập nhật' : 'thêm mới'} người dùng:`, formData);
+        console.log('Submitting form data:', formData); // Debug before submit
         handleSubmit(formData);
       }}>
         <Modal.Body>
@@ -38,7 +45,7 @@ const UserManagementModal = ({
             <Form.Control
               type="text"
               name="name"
-              value={formData.name}  // Hiển thị giá trị từ formData
+              value={formData.name}  // Đã sửa từ user?.name sang formData.name
               onChange={handleChange}
               required
             />
@@ -48,7 +55,7 @@ const UserManagementModal = ({
             <Form.Control
               type="email"
               name="email"
-              value={formData.email}
+              value={formData.email}  // Đã sửa từ user?.email sang formData.email
               onChange={handleChange}
               required
             />
@@ -58,7 +65,7 @@ const UserManagementModal = ({
             <Form.Control
               type="tel"
               name="phone"
-              value={formData.phone}
+              value={formData.phone}  // Đã sửa từ user?.phone sang formData.phone
               onChange={handleChange}
             />
           </Form.Group>
@@ -66,7 +73,7 @@ const UserManagementModal = ({
             <Form.Label>Vai trò</Form.Label>
             <Form.Select 
               name="role"
-              value={formData.role}
+              value={formData.role}  // Đã sửa từ user?.role sang formData.role
               onChange={handleChange}
             >
               <option value="user">Người dùng</option>
@@ -78,7 +85,7 @@ const UserManagementModal = ({
               type="checkbox"
               label="Kích hoạt tài khoản"
               name="active"
-              checked={formData.active}
+              checked={formData.active}  // Đã sửa từ user?.active sang formData.active
               onChange={(e) => setFormData(prev => ({ ...prev, active: e.target.checked }))}
             />
           </Form.Group>

@@ -61,9 +61,7 @@ const UserManagement = () => {
     setShowModal(true);
     dispatch(setCurrentUser(null));
   };
-  console.log('Dữ liệu người dùng hiện tại:', currentUser);
-  const handleShowEdit = (user) => {
-    console.log('Dữ liệu user khi click edit:', user);
+  const handleShowEdit = (user) => { // Đổi từ users thành user
     setShowModal(true);
     dispatch(setCurrentUser(user));
   };
@@ -112,10 +110,11 @@ const UserManagement = () => {
 
       <UserManagementTable
         users={users}
-        handleShowEdit={handleShowEdit}
+        handleShowEdit={handleShowEdit} // Sửa từ handleShowEdit(users) thành handleShowEdit
         handleDelete={handleDelete}
         pagination={pagination}
-        setPagination={handlePageChange}  // Thay đổi này
+        setPagination={handlePageChange}
+        currentUser={currentUser} // Thêm dòng này
       />
 
       <UserManagementModal

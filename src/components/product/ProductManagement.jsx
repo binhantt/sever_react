@@ -4,8 +4,7 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 
 
 const ProductManagement = ({ products = [], onEdit, onDelete }) => {
-
-
+  // console.log(products)
   return (
     <Container fluid className="p-0 mt-4">
       <Card className="shadow-sm border-0">
@@ -18,23 +17,49 @@ const ProductManagement = ({ products = [], onEdit, onDelete }) => {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Tên sản phẩm</th>
+                <th>Tên</th>
+                <th>Danh mục</th>
                 <th>Giá</th>
                 <th>Tồn kho</th>
+                <th>Ảnh</th>
                 <th>Trạng thái</th>
                 <th>Hành động</th>
+        
               </tr>
             </thead>
             <tbody>
               {products.map(product => (
                 <tr key={product.id}>
                   <td>{product.id}</td>
-                  <td>{product.name}</td>
-                  <td>{product.price.toLocaleString()}đ</td>
+                  <td>
+                    <div>{product.name}</div>
+                    <small className="text-muted">{product.description}</small>
+                  </td>
+                  <td>{product.category_name || product.categories?.name}</td>
+                  <td>{Number(product.price).toLocaleString('vi-VN')}đ</td>
                   <td>{product.stock}</td>
                   <td>
-                    <Badge bg={product.status === 'active' ? 'success' : 'secondary'}>
-                      {product.status === 'active' ? 'Hoạt động' : 'Ngừng bán'}
+                    {product.main_image_url && (
+                      <img 
+                        src={product.main_image_url} 
+                        alt={product.name}
+                        style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                      />
+                    )}
+                    {product.images && product.images.length > 0 && (
+                      product.images.map((image, index) => (
+                        <img 
+                          key={image.id}
+                          src={image.image_url} 
+                          alt={product.name}
+                          style={{ width: '50px', height: '50px', objectFit: 'cover', marginLeft: '5px' }}
+                        />
+                      ))
+                    )}
+                  </td>
+                  <td>
+                    <Badge bg={product.is_active ? 'success' : 'secondary'}>
+                      {product.is_active ? 'Hoạt động' : 'Ngừng bán'}
                     </Badge>
                   </td>
                   <td>

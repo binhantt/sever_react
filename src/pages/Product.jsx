@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Button, Form } from 'react-bootstrap';
 import Layout from '../components/layout/Layout';
 import { FaBox, FaSearch } from 'react-icons/fa';
@@ -7,22 +7,53 @@ import Breadcrumb from '../components/common/Breadcrumb';
 import ProductModal from '../components/product/ProductModal';
 import { toast , ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { addProduct, updateProduct, getProducts, deleteProduct } from '../store/Api/Product';
 
 const Product = () => {
   const [showModal, setShowModal] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
-  
-  // Di chuyển dữ liệu sản phẩm vào đây
-  const [products, setProducts] = useState([
-    { id: 1, name: 'Sản phẩm 1', price: 100000, stock: 10, status: 'active' },
-    { id: 2, name: 'Sản phẩm 2', price: 200000, stock: 5, status: 'inactive' }
-  ]);
+  const [formData, setFormData] = useState({});
+  const dispatch = useDispatch();
+  const { data: products = [], loading, error } = useSelector(state => state.product);
+  const { data: categories = [] } = useSelector(state => state.category);
 
-  const handleEdit = (product) => {
-    setCurrentProduct(product);
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    // Thêm logic xử lý đặc biệt nếu cần
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (checked ? 1 : 0) : value
+    }));
+  };
+  const handleAddNew = () => {
+    setCurrentProduct(null);
+    setFormData({
+      name: '',
+      description: '',
+      price: 0,
+      stock: 0,
+      is_active: 1,
+      main_image_url: ''
+    });
     setShowModal(true);
   };
-
+  
+  const handleEdit = (product) => {
+    setCurrentProduct(product);
+    setFormData({
+      name: product.name || '',
+      description: product.description || '',
+      price: product.price || 0,
+      stock: product.stock || 0,
+      is_active: product.is_active || 1,
+      main_image_url: product.main_image_url || '',
+      images: product.images || [] // Thêm images vào formData
+    });
+    setShowModal(true);
+  };
+  
   const handleDelete = (productId) => {
     toast.info(
         <div>
@@ -42,7 +73,7 @@ const Product = () => {
               size="sm"
               onClick={() => {
                 toast.dismiss();
-                setProducts(products.filter(product => product.id !== productId)); // Changed from onDelete to setProducts
+                dispatch(deleteProduct(productId)); // Sử dụng Redux action
                 toast.success('Đã xóa sản phẩm thành công!');
               }}
             >
@@ -57,13 +88,50 @@ const Product = () => {
       );
   };
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    // Load danh sách sản phẩm khi component mount
+    dispatch(getProducts());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!showModal) {
+      setFormData({});
+      setCurrentProduct(null);
+    }
+  }, [showModal]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Xử lý thêm/sửa sản phẩm
-    setShowModal(false);
-    toast.success(`Đã ${currentProduct ? 'cập nhật' : 'thêm'} sản phẩm thành công!`);
+    try {
+      if (currentProduct) {
+        // Cập nhật sản phẩm
+        await dispatch(updateProduct({
+          id: currentProduct.id,
+          productData: {
+            ...formData,
+            // Đảm bảo các trường số được convert đúng kiểu
+            price: Number(formData.price),
+            stock: Number(formData.stock)
+          }
+        }));
+      } else {
+        // Thêm sản phẩm mới
+        await dispatch(addProduct({
+          ...formData,
+          price: Number(formData.price),
+          stock: Number(formData.stock)
+        }));
+      }
+      setShowModal(false);
+      toast.success(`Đã ${currentProduct ? 'cập nhật' : 'thêm'} sản phẩm thành công!`);
+    } catch (error) {
+      toast.error(`Lỗi khi ${currentProduct ? 'cập nhật' : 'thêm'} sản phẩm`);
+    }
   };
 
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  
   return (
     <Layout>
       <Container fluid className="p-4">
@@ -87,8 +155,12 @@ const Product = () => {
                 className="me-2"
                 style={{ width: '250px' }}
               />
-              <Button variant="primary">
-                <FaSearch className="me-1" /> 
+              <Button 
+                variant="primary" 
+                onClick={handleAddNew}
+                className="me-2"
+              >
+                Thêm sản phẩm
               </Button>
             </div>
           </Col>
@@ -110,6 +182,9 @@ const Product = () => {
         handleSubmit={handleSubmit}
         product={currentProduct}
         isEditing={!!currentProduct}
+        handleChange={handleInputChange}
+        formData={formData}
+        categories={categories}
       />
       <ToastContainer position="bottom-right" />
     </Layout>
