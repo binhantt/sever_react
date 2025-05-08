@@ -34,8 +34,13 @@ const Product = () => {
       description: '',
       price: 0,
       stock: 0,
+      sku: '',
+      weight: '',
+      dimensions: '',
       is_active: 1,
-      main_image_url: ''
+      main_image_url: '',
+      images: [],
+      warranties: []
     });
     setShowModal(true);
   };
@@ -47,13 +52,18 @@ const Product = () => {
       description: product.description || '',
       price: product.price || 0,
       stock: product.stock || 0,
+      sku: product.sku || '',
+      category_id: product.category_id || '',
+      weight: product.weight || '',
+      dimensions: product.dimensions || '',
       is_active: product.is_active || 1,
       main_image_url: product.main_image_url || '',
-      images: product.images || [] // Thêm images vào formData
+      images: product.images || [],
+      warranties: product.warranties || []
     });
     setShowModal(true);
   };
-  
+  console.log('Form Data:', formData); // Log formData để kiểm tra
   const handleDelete = (productId) => {
     toast.info(
         <div>

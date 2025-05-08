@@ -33,6 +33,7 @@ export const addCategory = createAsyncThunk(
         { ...categoryData, image_url: categoryData.image_url || null }
       );
       return response.data.data;
+    
     } catch (error) {
       return rejectWithValue(error.response.data);
     }

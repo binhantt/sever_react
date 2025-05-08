@@ -4,7 +4,8 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 
 
 const ProductManagement = ({ products = [], onEdit, onDelete }) => {
-  // console.log(products)
+
+
   return (
     <Container fluid className="p-0 mt-4">
       <Card className="shadow-sm border-0">
@@ -21,6 +22,7 @@ const ProductManagement = ({ products = [], onEdit, onDelete }) => {
                 <th>Danh mục</th>
                 <th>Giá</th>
                 <th>Tồn kho</th>
+                <th>SKU</th>
                 <th>Ảnh</th>
                 <th>Trạng thái</th>
                 <th>Hành động</th>
@@ -38,6 +40,7 @@ const ProductManagement = ({ products = [], onEdit, onDelete }) => {
                   <td>{product.category_name || product.categories?.name}</td>
                   <td>{Number(product.price).toLocaleString('vi-VN')}đ</td>
                   <td>{product.stock}</td>
+                  <td>{product.sku || 'N/A'}</td>
                   <td>
                     {product.main_image_url && (
                       <img 
