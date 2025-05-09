@@ -82,8 +82,15 @@ const ProductModal = ({
   const handleAddImage = () => {
     if (!imageUrl.trim()) return;
     
-    const newImages = formData.images || [];
-    newImages.push({ image_url: imageUrl });
+    const newImages = [...(formData.images || [])];
+    const newImageData = {
+      image_url: imageUrl,
+      product_id: product?.id || null,
+      sort_order: newImages.length + 1,
+      created_at: new Date().toISOString()
+    };
+    
+    newImages.push(newImageData);
     
     handleChange({
       target: {
@@ -92,11 +99,11 @@ const ProductModal = ({
       }
     });
     
-    setImageUrl(''); // Reset input after adding
+    setImageUrl('');
   };
 
   const removeImage = (index) => {
-    const newImages = (formData.images || []).filter((_, i) => i !== index);
+    const newImages = formData.images.filter((_, i) => i !== index);
     handleChange({
       target: {
         name: 'images',
@@ -265,26 +272,50 @@ const ProductModal = ({
                       Thêm
                     </Button>
                   </div>
-                  <div className="d-flex flex-wrap mt-2">
-                    {(formData.images || []).map((img, index) => (
-                      <div key={index} className="position-relative me-2 mb-2">
-                        <img
-                          src={img.image_url}
-                          alt={`Product image ${index + 1}`}
-                          style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                          className="border rounded"
-                        />
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          className="position-absolute top-0 end-0"
-                          onClick={() => removeImage(index)}
-                          style={{ transform: 'translate(50%, -50%)' }}
+                  <div className="image-gallery mt-3">
+                    <div className="d-flex flex-wrap gap-2">
+                      {(formData.images || []).map((img, index) => (
+                        <div 
+                          key={img.id || index} 
+                          className="position-relative"
+                          style={{
+                            width: '150px',
+                            height: '150px',
+                            border: '1px solid #dee2e6',
+                            borderRadius: '4px',
+                            overflow: 'hidden'
+                          }}
                         >
-                          ×
-                        </Button>
-                      </div>
-                    ))}
+                          <img
+                            src={img.image_url}
+                            alt={`Product ${index + 1}`}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }}
+                          />
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            className="position-absolute top-0 end-0 m-1"
+                            onClick={() => removeImage(index)}
+                          >
+                            ×
+                          </Button>
+                          <div 
+                            className="position-absolute bottom-0 start-0 w-100 p-1"
+                            style={{
+                              background: 'rgba(0,0,0,0.5)',
+                              color: 'white',
+                              fontSize: '0.8rem'
+                            }}
+                          >
+                            {index + 1}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </Form.Group>
                 <Form.Group className="mb-3">
