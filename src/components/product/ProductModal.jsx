@@ -6,7 +6,7 @@ import ApiConfig from '../../config/Api.config';
 const ProductModal = ({
   show,
   handleClose,
-  handleSubmit,
+  handleSubmit: onSubmit,
   product = null,
   isEditing = false,
   handleChange,
@@ -29,6 +29,8 @@ const ProductModal = ({
 
   const [categories, setCategories] = useState([]);
 
+  const [imageUrl, setImageUrl] = useState('');
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -48,7 +50,7 @@ const ProductModal = ({
     console.log('Form Data:', categories); // Log formData để kiểm tra
     const safeCategories = Array.isArray(categories) ? categories : [];
     if (!isEditing) {
-      
+
       console.log(categories.data)
       setPreviewImages([]);
       setExistingImages([]);
@@ -59,9 +61,13 @@ const ProductModal = ({
         preview: img.image_url,
         isExisting: true
       })));
-    
+
     }
   }, [isEditing]);
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -73,26 +79,47 @@ const ProductModal = ({
     setPreviewImages([...previewImages, ...newImages]);
   };
 
+  const handleAddImage = () => {
+    if (!imageUrl.trim()) return;
+    
+    const newImages = formData.images || [];
+    newImages.push({ image_url: imageUrl });
+    
+    handleChange({
+      target: {
+        name: 'images',
+        value: newImages
+      }
+    });
+    
+    setImageUrl(''); // Reset input after adding
+  };
+
   const removeImage = (index) => {
-    // Xử lý cả ảnh hiện có và ảnh preview
-    if (index < existingImages.length) {
-      const newImages = [...existingImages];
-      newImages.splice(index, 1);
-      setExistingImages(newImages);
-    } else {
-      const newImages = [...previewImages];
-      newImages.splice(index - existingImages.length, 1);
-      setPreviewImages(newImages);
-    }
-  }
+    const newImages = (formData.images || []).filter((_, i) => i !== index);
+    handleChange({
+      target: {
+        name: 'images',
+        value: newImages
+      }
+    });
+  };
+
   const allImages = [...existingImages, ...previewImages];
   const handleWarrantyChange = (index, e) => {
     const { name, value } = e.target;
-    const updatedWarranties = [...formData.warranties];
+    const warranties = formData.warranties || [];
+    const updatedWarranties = [...warranties];
+    
+    if (!updatedWarranties[index]) {
+      updatedWarranties[index] = {};
+    }
+    
     updatedWarranties[index] = {
       ...updatedWarranties[index],
       [name]: value
     };
+
     handleChange({
       target: {
         name: 'warranties',
@@ -100,12 +127,34 @@ const ProductModal = ({
       }
     });
   };
+
+  const addWarranty = () => {
+    const warranties = formData.warranties || [];
+    handleChange({
+      target: {
+        name: 'warranties',
+        value: [...warranties, { warranty_period: '', warranty_provider: '', warranty_conditions: '' }]
+      }
+    });
+  };
+
+  const removeWarranty = (index) => {
+    const warranties = formData.warranties || [];
+    const updatedWarranties = warranties.filter((_, i) => i !== index);
+    handleChange({
+      target: {
+        name: 'warranties',
+        value: updatedWarranties
+      }
+    });
+  };
+
   return (
     <Modal show={show} onHide={handleClose} fullscreen>
       <Modal.Header closeButton>
         <Modal.Title>{isEditing ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}</Modal.Title>
       </Modal.Header>
-      <Form onSubmit={handleSubmit}>
+      <Form onSubmit={handleFormSubmit}>
         <Modal.Body style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 150px)' }}>
           <div className="container-fluid">
             <div className="row">
@@ -122,13 +171,13 @@ const ProductModal = ({
                     required
                   />
                 </Form.Group>
-                
+
                 {/* Phần danh mục riêng biệt */}
                 <div className="border-top pt-3 mt-3">
                   <h6>Danh mục sản phẩm</h6>
-                
+
                   <Form.Select
-                    name="category_id" 
+                    name="category_id"
                     value={category_id}
                     onChange={handleChange}
                     required
@@ -201,19 +250,29 @@ const ProductModal = ({
                 </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Label>Ảnh sản phẩm</Form.Label>
-                  <Form.Control
-                    type="file"
-                    multiple
-                    onChange={handleImageChange}
-                    accept="image/*"
-                  />
+                  <div className="d-flex mb-2">
+                    <Form.Control
+                      type="text"
+                      placeholder="Nhập URL ảnh..."
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      className="me-2"
+                    />
+                    <Button 
+                      variant="outline-primary"
+                      onClick={handleAddImage}
+                    >
+                      Thêm
+                    </Button>
+                  </div>
                   <div className="d-flex flex-wrap mt-2">
-                    {allImages.map((img, index) => (
-                      <div key={img.id || index} className="position-relative me-2 mb-2">
-                        <Image
-                          src={img.preview}
-                          thumbnail
+                    {(formData.images || []).map((img, index) => (
+                      <div key={index} className="position-relative me-2 mb-2">
+                        <img
+                          src={img.image_url}
+                          alt={`Product image ${index + 1}`}
                           style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                          className="border rounded"
                         />
                         <Button
                           variant="danger"
@@ -222,7 +281,7 @@ const ProductModal = ({
                           onClick={() => removeImage(index)}
                           style={{ transform: 'translate(50%, -50%)' }}
                         >
-                          &times;
+                          ×
                         </Button>
                       </div>
                     ))}
@@ -261,52 +320,30 @@ const ProductModal = ({
                 </Form.Group>
               </div>
 
-           
-                <div className="col-md-4 ps-3">
+
+              <div className="col-md-4 ps-3">
                 <h5 className="mb-3">Thông tin bảo hành</h5>
-                {formData.warranties?.length > 0 ? (
-                  formData.warranties.map((element, index) => (
-                    <div key={index}>
-                      <Form.Group className="mb-3">
-                        <Form.Label>Thời gian bảo hành</Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="warranty_period"
-                          value={element.warranty_period || ''}
-                          onChange={(e) => handleWarrantyChange(index, e)}
-                        />
-                      </Form.Group>
-                      <Form.Group className="mb-3">
-                        <Form.Label>Nhà cung cấp BH</Form.Label>
-                        <Form.Control
-                          type="text"
-                          name="warranty_provider"
-                          value={element.warranty_provider || ''}
-                          onChange={handleChange}
-                          placeholder="VD: Apple Vietnam"
-                        />
-                      </Form.Group>
-                      <Form.Group className="mb-3">
-                        <Form.Label>Điều kiện BH</Form.Label>
-                        <Form.Control
-                          as="textarea"
-                          name="warranty_conditions"
-                          value={element.warranty_conditions || ''}
-                          onChange={handleChange}
-                          rows={2}
-                          placeholder="VD: Bảo hành chính hãng"
-                        />
-                      </Form.Group>
-                    </div>
-                  ))
-                ) : (
-                  <div>
+                <Button variant="outline-primary" size="sm" className="mb-3" onClick={addWarranty}>
+                  Thêm bảo hành
+                </Button>
+                {(formData.warranties || []).map((warranty, index) => (
+                  <div key={index} className="border rounded p-3 mb-3 position-relative">
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      className="position-absolute top-0 end-0 m-2"
+                      onClick={() => removeWarranty(index)}
+                    >
+                      ×
+                    </Button>
                     <Form.Group className="mb-3">
                       <Form.Label>Thời gian bảo hành</Form.Label>
                       <Form.Control
                         type="text"
                         name="warranty_period"
-                        onChange={handleChange}
+                        value={warranty.warranty_period || ''}
+                        onChange={(e) => handleWarrantyChange(index, e)}
+                        placeholder="VD: 12 tháng"
                       />
                     </Form.Group>
                     <Form.Group className="mb-3">
@@ -314,7 +351,8 @@ const ProductModal = ({
                       <Form.Control
                         type="text"
                         name="warranty_provider"
-                        onChange={handleChange}
+                        value={warranty.warranty_provider || ''}
+                        onChange={(e) => handleWarrantyChange(index, e)}
                         placeholder="VD: Apple Vietnam"
                       />
                     </Form.Group>
@@ -323,15 +361,16 @@ const ProductModal = ({
                       <Form.Control
                         as="textarea"
                         name="warranty_conditions"
-                        onChange={handleChange}
+                        value={warranty.warranty_conditions || ''}
+                        onChange={(e) => handleWarrantyChange(index, e)}
                         rows={2}
                         placeholder="VD: Bảo hành chính hãng"
                       />
                     </Form.Group>
                   </div>
-                )}
+                ))}
               </div>
-             
+
             </div>
           </div>
         </Modal.Body>

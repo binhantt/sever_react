@@ -110,32 +110,33 @@ const Product = () => {
     }
   }, [showModal]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (productData) => {
     try {
+      const formattedData = {
+        ...productData,
+        price: Number(productData.price),
+        stock: Number(productData.stock),
+        warranties: productData.warranties?.map(warranty => ({
+          warranty_period: warranty.warranty_period || '',
+          warranty_provider: warranty.warranty_provider || '',
+          warranty_conditions: warranty.warranty_conditions || ''
+        })) || []
+      };
+
       if (currentProduct) {
-        // Cập nhật sản phẩm
         await dispatch(updateProduct({
           id: currentProduct.id,
-          productData: {
-            ...formData,
-            // Đảm bảo các trường số được convert đúng kiểu
-            price: Number(formData.price),
-            stock: Number(formData.stock)
-          }
+          productData: formattedData
         }));
       } else {
-        // Thêm sản phẩm mới
-        await dispatch(addProduct({
-          ...formData,
-          price: Number(formData.price),
-          stock: Number(formData.stock)
-        }));
+        await dispatch(addProduct(formattedData));
       }
       setShowModal(false);
       toast.success(`Đã ${currentProduct ? 'cập nhật' : 'thêm'} sản phẩm thành công!`);
+      // Refresh the products list after successful operation
+      dispatch(getProducts());
     } catch (error) {
-      toast.error(`Lỗi khi ${currentProduct ? 'cập nhật' : 'thêm'} sản phẩm`);
+      toast.error(`Lỗi khi ${currentProduct ? 'cập nhật' : 'thêm'} sản phẩm: ${error.message}`);
     }
   };
 
