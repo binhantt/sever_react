@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { Button, Toast } from 'react-bootstrap';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Button, Toast, Badge } from 'react-bootstrap';
 import UserManagementTable from './UserManagementTable';
 import UserManagementModal from './UserManagementModal';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchUsers,
   updateUser,
-  deleteUser
+  deleteUser,
+  createUser
 } from '../../store/Api/User.Api';
 import {
   setCurrentUser,
@@ -15,34 +16,65 @@ import {
 
 const UserManagement = () => {
   const dispatch = useDispatch();
-  const {
-    users,
-    currentUser,
-
-  } = useSelector(state => state.user);
+  const { users, currentUser, loading, error } = useSelector(state => state.user);
 
   const [showModal, setShowModal] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [toastVariant, setToastVariant] = useState('success');
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
     total: 0
   });
 
-  useEffect(() => {
-    dispatch(fetchUsers({
-      page: pagination.page,
-      limit: pagination.limit
-    })).then((action) => {
-      if (action.payload) {
-        setPagination(prev => ({
-          ...prev,
-          total: action.payload.totalCount || 0
-        }));
-      }
-    });
+  // Memoize loadUsers function to prevent unnecessary re-renders
+  const loadUsers = useCallback(async () => {
+    try {
+      const result = await dispatch(fetchUsers({
+        page: pagination.page,
+        limit: pagination.limit
+      })).unwrap();
+      
+      setPagination(prev => ({
+        ...prev,
+        total: result.totalCount || 0
+      }));
+    } catch (error) {
+      showToastMessage(
+        'Không thể tải danh sách người dùng. Vui lòng thử lại.',
+        'danger'
+      );
+    }
   }, [dispatch, pagination.page, pagination.limit]);
+
+  // Auto refresh data every 30 seconds
+  useEffect(() => {
+    loadUsers(); // Initial load
+
+    const autoRefreshInterval = setInterval(() => {
+      loadUsers();
+    }, 30000); // Refresh every 30 seconds
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(autoRefreshInterval);
+  }, [loadUsers]);
+
+  // Load users when pagination changes
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
+
+  // Refresh data after any update operation
+  const refreshData = useCallback(() => {
+    loadUsers();
+  }, [loadUsers]);
+
+  const showToastMessage = (message, variant = 'success') => {
+    setToastMessage(message);
+    setToastVariant(variant);
+    setShowToast(true);
+  };
 
   const handlePageChange = (newPage, newLimit) => {
     setPagination(prev => ({
@@ -51,6 +83,7 @@ const UserManagement = () => {
       limit: newLimit
     }));
   };
+
   const handleClose = () => {
     setShowModal(false);
     dispatch(setCurrentUser(null));
@@ -58,46 +91,91 @@ const UserManagement = () => {
   };
 
   const handleShowAdd = () => {
-    setShowModal(true);
     dispatch(setCurrentUser(null));
-  };
-  const handleShowEdit = (user) => { // Đổi từ users thành user
     setShowModal(true);
+  };
+
+  const handleShowEdit = (user) => {
     dispatch(setCurrentUser(user));
+    setShowModal(true);
   };
 
-  const handleDelete = (id) => {
-    dispatch(deleteUser(id))
-      .then(() => {
-        setToastMessage('Xóa người dùng thành công!');
-        setShowToast(true);
-      });
-  };
-
-  const handleSubmit = (formData) => {
-    console.log('Dữ liệu người dùng trước khi cập nhật:', currentUser);
-    console.log('Dữ liệu mới sẽ được cập nhật:', formData);
-
-    if (currentUser) {
-      dispatch(updateUser({ id: currentUser.id, userData: formData }))
-        .then((result) => {
-          console.log('Kết quả sau khi cập nhật:', result);
-          setToastMessage('Cập nhật người dùng thành công!');
-          setShowToast(true);
-          handleClose();
-        })
-        .catch((error) => {
-          console.error('Lỗi khi cập nhật:', error);
-        });
-    } else {
-      dispatch(createUser(formData))
-        .then(() => {
-          setToastMessage('Thêm người dùng thành công!');
-          setShowToast(true);
-          handleClose();
-        });
+  const handleToggleActive = async (user) => {
+    try {
+      await dispatch(updateUser({
+        id: user.id,
+        userData: {
+          ...user,
+          is_active: user.is_active === 1 ? 0 : 1
+        }
+      })).unwrap();
+      
+      showToastMessage(
+        `Tài khoản đã được ${user.is_active === 1 ? 'khóa' : 'kích hoạt'} thành công!`
+      );
+      refreshData(); // Refresh after toggle
+    } catch (error) {
+      showToastMessage(
+        'Không thể thay đổi trạng thái tài khoản. Vui lòng thử lại.',
+        'danger'
+      );
     }
   };
+
+  const handleDelete = async (id) => {
+    try {
+      await dispatch(deleteUser(id)).unwrap();
+      showToastMessage('Xóa người dùng thành công!');
+      refreshData(); // Refresh after delete
+    } catch (error) {
+      showToastMessage(
+        error.response?.data?.message || 'Không thể xóa người dùng. Vui lòng thử lại.',
+        'danger'
+      );
+    }
+  };
+
+  const handleSubmit = async (formData) => {
+    try {
+      if (currentUser) {
+        await dispatch(updateUser({ 
+          id: currentUser.id, 
+          userData: {
+            ...formData,
+            is_active: formData.is_active
+          }
+        })).unwrap();
+        showToastMessage('Cập nhật người dùng thành công!');
+      } else {
+        await dispatch(createUser({
+          ...formData,
+          is_active: formData.is_active
+        })).unwrap();
+        showToastMessage('Thêm người dùng thành công!');
+      }
+      handleClose();
+      refreshData(); // Refresh after submit
+    } catch (error) {
+      const errorMessage = error.response?.data?.message 
+        || (currentUser 
+          ? 'Không thể cập nhật người dùng. Vui lòng thử lại.'
+          : 'Không thể thêm người dùng mới. Vui lòng thử lại.');
+      
+      showToastMessage(errorMessage, 'danger');
+      throw error;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-5">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Đang tải...</span>
+        </div>
+        <p className="mt-2 text-muted">Đang tải dữ liệu...</p>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -108,21 +186,27 @@ const UserManagement = () => {
         </Button>
       </div>
 
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      )}
+
       <UserManagementTable
         users={users}
-        handleShowEdit={handleShowEdit} // Sửa từ handleShowEdit(users) thành handleShowEdit
+        handleShowEdit={handleShowEdit}
         handleDelete={handleDelete}
+        handleToggleActive={handleToggleActive}
         pagination={pagination}
         setPagination={handlePageChange}
-        currentUser={currentUser} // Thêm dòng này
+        currentUser={currentUser}
       />
 
       <UserManagementModal
         show={showModal}
         handleClose={handleClose}
         handleSubmit={handleSubmit}
-
-        user={currentUser} // Truyền dữ liệu user từ Redux store
+        user={currentUser}
         isEditing={!!currentUser}
       />
 
@@ -132,6 +216,8 @@ const UserManagement = () => {
         delay={3000}
         autohide
         className="position-fixed bottom-0 end-0 m-3"
+        bg={toastVariant}
+        text={toastVariant === 'dark' ? 'white' : 'dark'}
       >
         <Toast.Body>{toastMessage}</Toast.Body>
       </Toast>

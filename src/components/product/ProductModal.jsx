@@ -75,12 +75,9 @@ const ProductModal = ({
   }, []);
 
   useEffect(() => {
-    // Xử lý
-    console.log('Form Data:', categories); // Log formData để kiểm tra
+    
     const safeCategories = Array.isArray(categories) ? categories : [];
     if (!isEditing) {
-
-      console.log(categories.data)
       setPreviewImages([]);
       setExistingImages([]);
 
@@ -154,8 +151,30 @@ const ProductModal = ({
     setImageUrl('');
   };
 
+  const handleMainImageDelete = () => {
+    handleChange({
+      target: {
+        name: 'main_image_url',
+        value: ''
+      }
+    });
+  };
+
   const removeImage = (index) => {
-    const newImages = formData.images.filter((_, i) => i !== index);
+    const newImages = [...(formData.images || [])];
+    const removedImage = newImages[index];
+    
+    // If removing the main image, clear main_image_url
+    if (removedImage && removedImage.image_url === formData.main_image_url) {
+      handleChange({
+        target: {
+          name: 'main_image_url',
+          value: ''
+        }
+      });
+    }
+    
+    newImages.splice(index, 1);
     handleChange({
       target: {
         name: 'images',
@@ -430,7 +449,7 @@ const ProductModal = ({
                             variant="danger"
                             size="sm"
                             className="position-absolute top-0 end-0 m-2 rounded-circle"
-                            onClick={() => handleMainImageChange({ target: { value: '' } })}
+                            onClick={handleMainImageDelete}
                             style={{ width: '28px', height: '28px', padding: '0' }}
                           >
                             <i className="fas fa-times"></i>
@@ -557,7 +576,8 @@ const ProductModal = ({
                               borderRadius: '8px',
                               overflow: 'hidden',
                               cursor: 'pointer',
-                              backgroundColor: '#fff'
+                              backgroundColor: '#fff',
+                              transition: 'all 0.3s ease'
                             }}
                           >
                             <img
@@ -570,47 +590,58 @@ const ProductModal = ({
                               }}
                               onClick={() => setAsMainImage(img.image_url)}
                             />
-                            <div className="image-overlay">
-                              <div className="d-flex gap-1">
-                                <Button
-                                  variant="light"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setAsMainImage(img.image_url);
-                                  }}
-                                  className={`rounded-circle ${img.image_url === main_image_url ? 'text-warning' : ''}`}
-                                  style={{ width: '32px', height: '32px', padding: '0' }}
-                                >
-                                  <i className="fas fa-star"></i>
-                                </Button>
-                                <Button
-                                  variant="danger"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    removeImage(index);
-                                  }}
-                                  className="rounded-circle"
-                                  style={{ width: '32px', height: '32px', padding: '0' }}
-                                >
-                                  <i className="fas fa-trash"></i>
-                                </Button>
-                              </div>
-                            </div>
-                            {img.image_url === main_image_url && (
-                              <div 
-                                className="position-absolute top-0 start-0 m-1 px-2 py-1"
+                            {/* Delete button always visible */}
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              className="position-absolute top-0 end-0 m-1 rounded-circle"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeImage(index);
+                              }}
+                              style={{ 
+                                width: '24px', 
+                                height: '24px', 
+                                padding: '0',
+                                fontSize: '12px',
+                                zIndex: 2
+                              }}
+                            >
+                              <i className="fas fa-times"></i>
+                            </Button>
+                            {/* Overlay with additional actions */}
+                            <div 
+                              className="position-absolute bottom-0 start-0 w-100 p-1"
+                              style={{
+                                background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+                                transition: 'opacity 0.3s ease'
+                              }}
+                            >
+                              <Button
+                                variant={img.image_url === main_image_url ? "warning" : "light"}
+                                size="sm"
+                                className="w-100"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setAsMainImage(img.image_url);
+                                }}
                                 style={{
-                                  backgroundColor: 'rgba(255, 193, 7, 0.9)',
-                                  borderRadius: '4px',
-                                  fontSize: '0.7rem'
+                                  fontSize: '12px'
                                 }}
                               >
-                                <i className="fas fa-star me-1"></i>
-                                Ảnh chính
-                              </div>
-                            )}
+                                {img.image_url === main_image_url ? (
+                                  <>
+                                    <i className="fas fa-star me-1"></i>
+                                    Ảnh chính
+                                  </>
+                                ) : (
+                                  <>
+                                    <i className="far fa-star me-1"></i>
+                                    Đặt làm ảnh chính
+                                  </>
+                                )}
+                              </Button>
+                            </div>
                           </div>
                         ))}
                       </div>

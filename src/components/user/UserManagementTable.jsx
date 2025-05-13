@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {
   Card,
@@ -40,7 +40,7 @@ const UserManagementTable = ({
   currentUser = null 
 }) => {
   // Convert users to array if it's an object
-  const usersArray = Array.isArray(users) ? users : [users];
+  const usersArray = useMemo(() => Array.isArray(users) ? users : [users], [users]);
   
   // State for search, pagination, per page
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,35 +49,48 @@ const UserManagementTable = ({
   const [sortField, setSortField] = useState('id');
   const [sortDirection, setSortDirection] = useState('asc');
 
-  // Filter users by name, email, id
-  const filteredUsers = usersArray.filter(user =>
-    user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.id?.toString().includes(searchTerm)
-  );
+  // Reset pagination when users data changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [users.length]);
 
-  // Sort users
-  const sortedUsers = [...filteredUsers].sort((a, b) => {
-    let comparison = 0;
-    if (sortField === 'id') {
-      comparison = a.id - b.id;
-    } else if (sortField === 'name') {
-      comparison = a.name.localeCompare(b.name);
-    } else if (sortField === 'email') {
-      comparison = a.email.localeCompare(b.email);
-    } else if (sortField === 'active') {
-      comparison = (a.active === b.active) ? 0 : a.active ? -1 : 1;
-    } else if (sortField === 'role') {
-      comparison = a.role.localeCompare(b.role);
-    }
-    return sortDirection === 'asc' ? comparison : -comparison;
-  });
+  // Memoize filtered users
+  const filteredUsers = useMemo(() => 
+    usersArray.filter(user =>
+      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.id?.toString().includes(searchTerm)
+    ), [usersArray, searchTerm]);
 
-  // Pagination logic
-  const indexOfLast = currentPage * perPage;
-  const indexOfFirst = indexOfLast - perPage;
-  const currentUsers = sortedUsers.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(sortedUsers.length / perPage);
+  // Memoize sorted users
+  const sortedUsers = useMemo(() => 
+    [...filteredUsers].sort((a, b) => {
+      let comparison = 0;
+      if (sortField === 'id') {
+        comparison = a.id - b.id;
+      } else if (sortField === 'name') {
+        comparison = a.name.localeCompare(b.name);
+      } else if (sortField === 'email') {
+        comparison = a.email.localeCompare(b.email);
+      } else if (sortField === 'active') {
+        comparison = (a.is_active === b.is_active) ? 0 : a.is_active > b.is_active ? -1 : 1;
+      } else if (sortField === 'role') {
+        comparison = a.role.localeCompare(b.role);
+      }
+      return sortDirection === 'asc' ? comparison : -comparison;
+    }), [filteredUsers, sortField, sortDirection]);
+
+  // Memoize pagination calculations
+  const { currentUsers, totalPages, indexOfFirst, indexOfLast } = useMemo(() => {
+    const indexOfLast = currentPage * perPage;
+    const indexOfFirst = indexOfLast - perPage;
+    return {
+      currentUsers: sortedUsers.slice(indexOfFirst, indexOfLast),
+      totalPages: Math.ceil(sortedUsers.length / perPage),
+      indexOfFirst,
+      indexOfLast
+    };
+  }, [sortedUsers, currentPage, perPage]);
 
   // Pagination items with ellipsis
   const getPaginationItems = () => {
@@ -208,7 +221,7 @@ const UserManagementTable = ({
                       </Badge>
                     </td>
                     <td className="border-0 text-center">
-                      {user.active ? (
+                      {user.is_active === 1 ? (
                         <Badge bg="success" className="fw-normal">Hoạt động</Badge>
                       ) : (
                         <Badge bg="danger" className="fw-normal">Khóa</Badge>
@@ -288,7 +301,7 @@ const UserManagementTable = ({
     </Container>
   );
 };
-export default UserManagementTable;
+export default React.memo(UserManagementTable);
 // Quản lý bảng người dùng (User Management Table)
 // Mô tả: Component hiển thị danh sách người dùng với các chức năng phân trang và hiển thị thông tin chi tiết
 // Các chức năng chính:
