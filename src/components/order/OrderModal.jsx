@@ -1,86 +1,210 @@
-import React from 'react';
-import { Form, Modal } from 'react-bootstrap';
-import BaseModal from '../common/BaseModal';
+import React, { useEffect, useState } from 'react';
+import { Modal, Form, Button, Table } from 'react-bootstrap';
+import { FaTrash, FaEdit } from 'react-icons/fa';
 
 const OrderModal = ({ 
-  show, 
-  handleClose, 
-  handleSubmit,
-  order = null,
-  isEditing = false 
+  show = false, 
+  onHide = () => {}, 
+  onSave = () => {},
+  order = null
 }) => {
-  const { 
-    customer = '', 
-    phone = '', 
-    address = '', 
-    total = '', 
-    status = '',
-  } = order || {};
-  console.log(order);
-  console.log(isEditing);
+  const [formData, setFormData] = useState({
+    user_name: '',
+    user_email: '',
+    shipping_address: '',
+    status: 'pending',
+    items: [],
+    total_amount: 0
+  });
+
+  useEffect(() => {
+    if (order) {
+      setFormData({
+        user_name: order.user_name || '',
+        user_email: order.user_email || '',
+        shipping_address: order.shipping_address || '',
+        status: order.status || 'pending',
+        items: order.items || [],
+        total_amount: order.total_amount || 0
+      });
+    } else {
+      setFormData({
+        user_name: '',
+        user_email: '',
+        shipping_address: '',
+        status: 'pending',
+        items: [],
+        total_amount: 0
+      });
+    }
+  }, [order]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  const handleQuantityChange = (index, newQuantity) => {
+    const updatedItems = [...formData.items];
+    updatedItems[index] = {
+      ...updatedItems[index],
+      quantity: parseInt(newQuantity) || 1
+    };
+    
+    // Recalculate total
+    const newTotal = updatedItems.reduce((sum, item) => {
+      return sum + (parseFloat(item.price) * parseInt(item.quantity));
+    }, 0);
+
+    setFormData(prev => ({
+      ...prev,
+      items: updatedItems,
+      total_amount: newTotal.toString()
+    }));
+  };
+
+  const handleRemoveItem = (index) => {
+    const updatedItems = formData.items.filter((_, i) => i !== index);
+    const newTotal = updatedItems.reduce((sum, item) => {
+      return sum + (parseFloat(item.price) * parseInt(item.quantity));
+    }, 0);
+
+    setFormData(prev => ({
+      ...prev,
+      items: updatedItems,
+      total_amount: newTotal.toString()
+    }));
+  };
+
   return (
-    <BaseModal
-      show={show}
-      handleClose={handleClose}
-      title={isEditing ? 'Chỉnh sửa đơn hàng' : 'Thêm đơn hàng mới'}
-      submitText={isEditing ? 'Cập nhật' : 'Thêm mới'}
-    >
+    <Modal show={show} onHide={onHide} size="lg">
       <Form onSubmit={handleSubmit}>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {order ? 'Chỉnh sửa đơn hàng' : 'Tạo đơn hàng mới'}
+          </Modal.Title>
+        </Modal.Header>
         <Modal.Body>
           <Form.Group className="mb-3">
-            <Form.Label>Khách hàng</Form.Label>
-            <Form.Control 
-              type="text" 
-              defaultValue={customer}
+            <Form.Label>Tên khách hàng</Form.Label>
+            <Form.Control
+              type="text"
+              name="user_name"
+              value={formData.user_name}
+              onChange={handleChange}
               required
             />
           </Form.Group>
+
           <Form.Group className="mb-3">
-            <Form.Label>Số điện thoại</Form.Label>
-            <Form.Control 
-              type="tel" 
-              defaultValue={phone}
+            <Form.Label>Email</Form.Label>
+            <Form.Control
+              type="email"
+              name="user_email"
+              value={formData.user_email}
+              onChange={handleChange}
               required
             />
           </Form.Group>
+
           <Form.Group className="mb-3">
-            <Form.Label>Địa chỉ</Form.Label>
-            <Form.Control 
-              as="textarea" 
-              defaultValue={address}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Trạng thái</Form.Label>
-            <Form.Select defaultValue={status}>
-              <option value="Chờ xử lý">Chờ xử lý</option>
-              <option value="Đang giao">Đang giao</option>
-              <option value="Đã giao">Đã giao</option>
-            </Form.Select>
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Tổng tiền</Form.Label>
-            <Form.Control 
-              type="number" 
-              defaultValue={total}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Sản phẩm</Form.Label>
+            <Form.Label>Địa chỉ giao hàng</Form.Label>
             <Form.Control
               as="textarea"
-              rows={3}
-              defaultValue={order?.products?.map(p => 
-                `${p.name} - ${p.price.toLocaleString()}đ x ${p.quantity}`
-              ).join('\n')}
-              placeholder="Mỗi sản phẩm trên 1 dòng, định dạng: Tên sản phẩm - Giá x Số lượng"
+              rows={2}
+              name="shipping_address"
+              value={formData.shipping_address}
+              onChange={handleChange}
+              required
             />
           </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Trạng thái</Form.Label>
+            <Form.Select
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+            >
+              <option value="pending">Chờ xử lý</option>
+              <option value="processing">Đang xử lý</option>
+              <option value="completed">Hoàn thành</option>
+              <option value="cancelled">Đã hủy</option>
+            </Form.Select>
+          </Form.Group>
+
+          <div className="mb-3">
+            <h6>Sản phẩm</h6>
+            <Table responsive>
+              <thead>
+                <tr>
+                  <th>Tên sản phẩm</th>
+                  <th>Giá</th>
+                  <th>Số lượng</th>
+                  <th>Thành tiền</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {formData.items.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.product_name}</td>
+                    <td>{Number(item.price).toLocaleString()}đ</td>
+                    <td style={{ width: '100px' }}>
+                      <Form.Control
+                        type="number"
+                        min="1"
+                        value={item.quantity}
+                        onChange={(e) => handleQuantityChange(index, e.target.value)}
+                      />
+                    </td>
+                    <td>{(Number(item.price) * item.quantity).toLocaleString()}đ</td>
+                    <td>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => handleRemoveItem(index)}
+                      >
+                        <FaTrash />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+                {formData.items.length === 0 && (
+                  <tr>
+                    <td colSpan="5" className="text-center">
+                      Không có sản phẩm nào
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan="3" className="text-end"><strong>Tổng cộng:</strong></td>
+                  <td colSpan="2"><strong>{Number(formData.total_amount).toLocaleString()}đ</strong></td>
+                </tr>
+              </tfoot>
+            </Table>
+          </div>
         </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={onHide}>
+            Hủy
+          </Button>
+          <Button variant="primary" type="submit">
+            {order ? 'Cập nhật' : 'Tạo mới'}
+          </Button>
+        </Modal.Footer>
       </Form>
-    </BaseModal>
+    </Modal>
   );
 };
 
