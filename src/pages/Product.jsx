@@ -63,7 +63,7 @@ const Product = () => {
     });
     setShowModal(true);
   };
-  console.log('Form Data:', formData); // Log formData để kiểm tra
+
   const handleDelete = (productId) => {
     toast.info(
         <div>
