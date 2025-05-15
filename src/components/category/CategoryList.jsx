@@ -9,6 +9,7 @@ const CategoryList = ({ categories = [], onEdit, onDelete }) => {
         <thead className="bg-light">
           <tr>
             <th className="px-4 py-3" style={{ width: '80px' }}>ID</th>
+            <th className="px-4 py-3">Danh mục cha</th>
             <th className="px-4 py-3">Tên danh mục</th>
             <th className="px-4 py-3" style={{ width: '150px' }}>Hình ảnh</th>
             <th className="px-4 py-3 text-center" style={{ width: '120px' }}>Thao tác</th>
@@ -33,6 +34,13 @@ const CategoryList = ({ categories = [], onEdit, onDelete }) => {
                   </Badge>
                 </td>
                 <td className="px-4">
+                  {category.parent_name ? (
+                    <span className="text-muted">{category.parent_name}</span>
+                  ) : (
+                    <span className="text-muted">Không có</span>
+                  )}
+                </td>
+                <td className="px-4">
                   <div className="d-flex flex-column">
                     <span className="fw-medium text-dark">{category.name}</span>
                     {category.description && (
@@ -40,6 +48,7 @@ const CategoryList = ({ categories = [], onEdit, onDelete }) => {
                     )}
                   </div>
                 </td>
+             
                 <td className="px-4">
                   {category.image ? (
                     <div className="position-relative" style={{ width: '60px', height: '60px' }}>

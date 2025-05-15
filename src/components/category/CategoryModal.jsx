@@ -4,24 +4,29 @@ import { FaUpload, FaImage, FaLink } from 'react-icons/fa';
 import axios from 'axios';
 import ImgBBConfig from '../../config/ImgBB.config';
 
+
 const CategoryModal = ({ 
   show, 
   handleClose, 
   handleSubmit,
   category = null,
-  isEditing = false 
+  isEditing = false,
+  parentCategories = []
 }) => {
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     active: true,
     image: '',
-    image_url: ''
+    image_url: '',
+    parent_id: ''
   });
-
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragActive, setDragActive] = useState(false);
+  useEffect(() => {
+  }, [parentCategories]);
 
   useEffect(() => {
     if (category) {
@@ -30,7 +35,9 @@ const CategoryModal = ({
         description: category.description || '',
         active: category.active !== false,
         image: category.image || '',
-        image_url: category.image || ''
+        image_url: category.image || '',
+        parent_name: category.parent_name || '',
+        parent_id: category.parent_id || '' // Make sure this is included
       });
     } else {
       setFormData({
@@ -38,7 +45,8 @@ const CategoryModal = ({
         description: '',
         active: true,
         image: '',
-        image_url: ''
+        image_url: '',
+        parent_id: ''
       });
     }
   }, [category]);
@@ -47,19 +55,22 @@ const CategoryModal = ({
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-
+  const categoriesManin = (currentCategoryId, parentCategories) => {
+ 
+    return parentCategories; // Make sure to return the array
+  };
   const handleImageUpload = async (file) => {
     if (!file) return;
 
     setUploading(true);
     setUploadProgress(0);
-    const formData = new FormData();
-    formData.append('image', file);
+    const uploadFormData = new FormData(); // Changed variable name here
+    uploadFormData.append('image', file);
 
     try {
       const response = await axios.post(
         `${ImgBBConfig.uploadUrl}?key=${ImgBBConfig.apiKey}`, 
-        formData, 
+        uploadFormData, // Use the renamed variable here
         {
           headers: {
             'Content-Type': 'multipart/form-data'
@@ -118,6 +129,21 @@ const CategoryModal = ({
         <Modal.Body className="p-4">
           <div className="row">
             <div className="col-md-7">
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-medium">Danh mục cha</Form.Label>
+                <Form.Select
+                  name="parent_id"
+                  value={formData.parent_id}
+                  onChange={handleChange}
+                >
+                  {categoriesManin(formData.parent_name, parentCategories).map(parent => (
+                    <option key={parent.id} value={parent.id}>
+                      {parent.name.replace(/\r\n/g, ' ')}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+
               <Form.Group className="mb-3">
                 <Form.Label className="fw-medium">Tên danh mục</Form.Label>
                 <Form.Control

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCategories, addCategory, updateCategory, deleteCategory } from '../store/Api/Category';
 import Layout from '../components/layout/Layout';
@@ -8,15 +8,21 @@ import CategoryList from '../components/category/CategoryList';
 import CategoryModal from '../components/category/CategoryModal';
 import { toast, ToastContainer } from 'react-toastify';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-
-const ProductCategory = () => {
-  const dispatch = useDispatch();
+import { fetchParentCategories } from '../store/Api/ParentCategory.Api';
+  // In the parent component (ProductCategory.jsx)
+  
+  // When rendering CategoryModal:
+  const ProductCategory = () => {
+    if (typeof React.useContext === 'undefined') {
+      return <div>Loading...</div>;
+    }
+    const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const page = parseInt(searchParams.get('page')) || 1;
   const limit = parseInt(searchParams.get('limit')) || 5;
   
-  const { data, loading, error, pagination } = useSelector(state => ({
+  const { data, loading, error, pagination, parentCategories } = useSelector(state => ({
     data: state.category?.data || [],
     loading: state.category?.loading || false,
     error: state.category?.error || null,
@@ -25,9 +31,10 @@ const ProductCategory = () => {
       itemsPerPage: 5,
       totalItems: 0,
       totalPages: 1
-    }
+    },
+    parentCategories: state.parentCategory?.data || [] // Add this line
   }));
-
+  
   const [showModal, setShowModal] = useState(false);
   const [currentCategory, setCurrentCategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,6 +48,7 @@ const ProductCategory = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  
   useEffect(() => {
     if (Array.isArray(data)) {
       setVirtualData(data);
@@ -67,6 +75,11 @@ const ProductCategory = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchData();
+      dispatch(fetchParentCategories()).then(() => {
+        // Remove these lines:
+        // console.log('Parent categories after fetch:', parentCategories);
+        // console.log('Parent Categories:', parentCategories);
+      });
     }, 500);
     return () => clearTimeout(timer);
   }, [dispatch, page, limit, debouncedSearchTerm]);
@@ -131,48 +144,43 @@ const ProductCategory = () => {
       }
     );
   };
-
   const handleSubmit = async (formData) => {
     try {
       if (currentCategory) {
-        const oldData = [...virtualData];
-        
-        setVirtualData(prev => prev.map(item => 
-          item.id === currentCategory.id ? {...item, ...formData} : item
-        ));
-        
-        const action = await dispatch(updateCategory({ 
-          id: currentCategory.id, 
-          categoryData: formData 
+        const updatedData = {
+          ...currentCategory,
+          ...formData,
+          parent_id: formData.parent_id || currentCategory.parent_id
+        };
+  
+        if (formData.parent_id && formData.parent_id !== currentCategory.parent_id) {
+          const parent = parentCategories.find(p => p.id === formData.parent_id);
+          updatedData.parent_name = parent ? parent.name : currentCategory.parent_name;
+        }
+  
+        await dispatch(updateCategory({
+          id: currentCategory.id,
+          categoryData: updatedData
         }));
         
-        if (action.payload) {
-          setVirtualData(prev => prev.map(item => 
-            item.id === currentCategory.id ? action.payload : item
-          ));
-          toast.success('Cập nhật thành công!');
-        }
-      } else {
-        const tempId = `temp_${Date.now()}`;
-        const newItem = {id: tempId, ...formData, isVirtual: true};
+        // Force refresh by fetching latest data
+        await dispatch(getCategories({
+          page,
+          limit,
+          search: debouncedSearchTerm
+        }));
         
-        setVirtualData(prev => [...prev, newItem]);
+        // Close modal after successful update
+        setShowModal(false);
+        setCurrentCategory(null);
         
-        const action = await dispatch(addCategory(formData));
-        
-        if (action.payload) {
-          setVirtualData(prev => prev.filter(item => item.id !== tempId).concat(action.payload));
-          toast.success('Thêm mới thành công!');
-        }
+        toast.success('Cập nhật danh mục thành công');
       }
-      setShowModal(false);
-      setCurrentCategory(null);
     } catch (error) {
-      setVirtualData(data);
-      toast.error('Lỗi: ' + (error.message || 'Vui lòng thử lại'));
+      console.error('Update error:', error);
+      toast.error('Có lỗi xảy ra khi cập nhật dữ liệu');
     }
-  };
-
+  }; 
   if (loading) {
     return (
       <Layout>
@@ -289,17 +297,16 @@ const ProductCategory = () => {
           </div>
         )}
       </Container>
-
       <CategoryModal
         show={showModal}
         handleClose={() => {
-          setVirtualData(data);
           setShowModal(false);
           setCurrentCategory(null);
         }}
         handleSubmit={handleSubmit}
         category={currentCategory}
         isEditing={!!currentCategory}
+        parentCategories={parentCategories} // Only pass once here
       />
 
       <ToastContainer
