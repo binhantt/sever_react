@@ -15,6 +15,7 @@ const adminSlice = createSlice({
     },
     loginSuccess: (state, action) => {
       state.user = action.payload.data.user;
+      
       state.loading = false;
       state.error = null;
     },

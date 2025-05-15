@@ -13,6 +13,9 @@ const Logout = () => {
         const performLogout = async () => {
             try {
                 await axios.post(`${ApiConfig.severAdmin}${ApiConfig.logout}`);
+                localStorage.removeItem('user');
+            } catch (error) {
+                console.error('Logout failed:', error);
             } finally {
                 dispatch(logout());
                 navigate('/');
