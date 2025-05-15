@@ -137,30 +137,29 @@ const UserManagement = () => {
 
   const handleSubmit = async (formData) => {
     try {
-      if (currentUser) {
-        await dispatch(updateUser({ 
+      if (currentUser && currentUser.id) { // Add null check
+        const result = await dispatch(updateUser({ 
           id: currentUser.id, 
-          userData: {
-            ...formData,
-            is_active: formData.is_active
-          }
+          userData: formData
         })).unwrap();
         showToastMessage('Cập nhật người dùng thành công!');
-      } else {
+        handleClose();
+        refreshData();
+      } else if (!currentUser) {
+        // Handle create user case
         await dispatch(createUser({
           ...formData,
           is_active: formData.is_active
         })).unwrap();
         showToastMessage('Thêm người dùng thành công!');
+        handleClose();
+        refreshData();
       }
-      handleClose();
-      refreshData(); // Refresh after submit
     } catch (error) {
-      const errorMessage = error.response?.data?.message 
-        || (currentUser 
-          ? 'Không thể cập nhật người dùng. Vui lòng thử lại.'
-          : 'Không thể thêm người dùng mới. Vui lòng thử lại.');
-      
+      console.error('Update error:', error);
+      const errorMessage = error.message || 
+        error.response?.data?.message || 
+        'Có lỗi xảy ra khi cập nhật';
       showToastMessage(errorMessage, 'danger');
       throw error;
     }
@@ -217,7 +216,7 @@ const UserManagement = () => {
         autohide
         className="position-fixed bottom-0 end-0 m-3"
         bg={toastVariant}
-        text={toastVariant === 'dark' ? 'white' : 'dark'}
+        text={toastVariant === 'success'? 'light' : 'dark'}
       >
         <Toast.Body>{toastMessage}</Toast.Body>
       </Toast>

@@ -216,8 +216,11 @@ const UserManagementTable = ({
                       <span className="text-muted">{user.email}</span>
                     </td>
                     <td className="border-0 text-center">
-                      <Badge bg={user.role === 'admin' ? 'primary' : 'secondary'} className="fw-normal">
-                        {user.role === 'admin' ? 'Quản trị' : 'Người dùng'}
+                      <Badge 
+                        bg={user.role === 'admin' ? 'primary' : user.role === 'part_time' ? 'info' : 'secondary'} 
+                        className="fw-normal"
+                      >
+                        {user.role === 'admin' ? 'Quản trị' : user.role === 'part_time' ? 'Nhân viên' : 'Người dùng'}
                       </Badge>
                     </td>
                     <td className="border-0 text-center">
@@ -302,41 +305,3 @@ const UserManagementTable = ({
   );
 };
 export default React.memo(UserManagementTable);
-// Quản lý bảng người dùng (User Management Table)
-// Mô tả: Component hiển thị danh sách người dùng với các chức năng phân trang và hiển thị thông tin chi tiết
-// Các chức năng chính:
-// - Hiển thị danh sách người dùng theo trang
-// - Hỗ trợ phân trang với các nút điều hướng (First, Prev, Next, Last)
-// - Displays the number of selected users
-// Pagination Footer Component
-// Mô tả: Footer của bảng quản lý người dùng, hiển thị thông tin phân trang và điều hướng
-// Các chức năng chính:
-// - Hiển thị khoảng người dùng hiện tại trên trang
-// - Cung cấp các nút điều hướng phân trang (First, Previous, Next, Last)
-// - Hỗ trợ trạng thái disabled cho các nút khi ở đầu/cuối danh sách
-
-// Props chính:
-// - filteredUsers: Mảng người dùng đã được lọc
-// - indexOfFirst: Chỉ số người dùng đầu tiên của trang hiện tại
-// - indexOfLast: Chỉ số người dùng cuối cùng của trang hiện tại
-// - currentPage: Trang hiện tại
-// - totalPages: Tổng số trang
-// - setCurrentPage: Hàm cập nhật trang hiện tại
-
-// Cấu trúc:
-// - Sử dụng Card.Footer từ React Bootstrap
-// - Layout responsive với Row và Col
-// - Pagination được điều chỉnh kích thước và vị trí
-// - Hiển thị thông tin số lượng người dùng được chọn
-// - Hỗ trợ hiển thị khoảng người dùng hiện tại
-
-// Các props và state quan trọng:
-// - filteredUsers: Mảng người dùng đã được lọc
-// - currentPage: Trang hiện tại
-// - totalPages: Tổng số trang
-// - indexOfFirst, indexOfLast: Chỉ số người dùng đầu và cuối của trang hiện tại
-
-// Các thành phần con:
-// - Table: Bảng hiển thị danh sách người dùng
-// - Pagination: Điều khiển phân trang
-// - Card, Card.Body, Card.Footer: Cấu trúc bố cục component

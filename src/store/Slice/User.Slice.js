@@ -59,7 +59,11 @@ const userSlice = createSlice({
       })
       .addCase(updateUser.fulfilled, (state, action) => {
         state.operationLoading = false;
-        const index = state.users.findIndex(u => u.id === action.payload.id);
+        if (!action.payload?.id) {
+          console.error('Update failed: No id in payload');
+          return;
+        }
+        const index = state.users.findIndex(u => u?.id === action.payload.id);
         if (index !== -1) {
           state.users[index] = action.payload;
         }

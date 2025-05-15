@@ -35,7 +35,7 @@ export const updateOrder = createAsyncThunk(
   'orders/updateOrder',
   async ({ id, orderData }) => {
     try {
-      const response = await axios.put(`${ApiConfig.severAdmin}/orders/${id}`, orderData);
+      const response = await axios.put(`${ApiConfig.severAdmin}/orders/update/${id}`, orderData);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;

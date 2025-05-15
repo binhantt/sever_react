@@ -11,6 +11,7 @@ const OrderModal = ({
   const [formData, setFormData] = useState({
     user_name: '',
     user_email: '',
+    user_phone: '',
     shipping_address: '',
     status: 'pending',
     items: [],
@@ -23,6 +24,8 @@ const OrderModal = ({
         user_name: order.user_name || '',
         user_email: order.user_email || '',
         shipping_address: order.shipping_address || '',
+        user_phone: order.user_phone || '', 
+        
         status: order.status || 'pending',
         items: order.items || [],
         total_amount: order.total_amount || 0
@@ -69,8 +72,7 @@ const OrderModal = ({
       items: updatedItems,
       total_amount: newTotal.toString()
     }));
-  };
-
+  }
   const handleRemoveItem = (index) => {
     const updatedItems = formData.items.filter((_, i) => i !== index);
     const newTotal = updatedItems.reduce((sum, item) => {
@@ -110,6 +112,17 @@ const OrderModal = ({
               type="email"
               name="user_email"
               value={formData.user_email}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Số điện thoại</Form.Label>
+            <Form.Control
+              type="tel"
+              name="user_phone"
+              value={formData.user_phone}
               onChange={handleChange}
               required
             />

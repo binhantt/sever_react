@@ -128,6 +128,7 @@ const UserManagementModal = ({
             >
               <option value="user">Người dùng</option>
               <option value="admin">Quản trị viên</option>
+              <option value="part_time">Nhân viên</option>
             </Form.Select>
           </Form.Group>
 
@@ -170,7 +171,7 @@ const UserManagementModal = ({
               isEditing ? 'Cập nhật' : 'Thêm mới'
             )}
           </Button>
-        </Modal.Footer>
+        </Modal.Footer> 
       </Form>
     </Modal>
   );

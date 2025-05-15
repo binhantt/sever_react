@@ -39,13 +39,24 @@ const Order = () => {
         page: pagination.page,
         limit: pagination.limit
       })).unwrap();
-      
-      setPagination(prev => ({
-        ...prev,
-        total: result.total || 0
-      }));
+        console.log(result)
+      if (result.success) {
+        setPagination(prev => ({
+          ...prev,
+          total: result.data.length || 0
+        }));
+        toast.success('Đã tải danh sách đơn hàng thành công', {
+          position: "top-right",
+          autoClose: 2000
+        });
+      } else {
+        throw new Error(result.message || 'Failed to load orders');
+      }
     } catch (error) {
-      toast.error('Không thể tải danh sách đơn hàng');
+      toast.error('Không thể tải danh sách đơn hàng', {
+        position: "top-right",
+        autoClose: 3000
+      });
     }
   };
 
@@ -59,19 +70,59 @@ const Order = () => {
 
   const handleEdit = (order) => {
     setSelectedOrder(order);
+    console.log(order)
     setShowModal(true);
+    toast.info(`Đang chỉnh sửa đơn hàng #${order.id}`, {
+      position: "top-right",
+      autoClose: 2000
+    });
   };
 
   const handleDelete = async (orderId) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa đơn hàng này?')) {
-      try {
-        await dispatch(deleteOrder(orderId)).unwrap();
-        toast.success('Xóa đơn hàng thành công');
-        loadOrders();
-      } catch (error) {
-        toast.error('Không thể xóa đơn hàng');
+    toast.warn(
+      <div>
+        <h6>Xác nhận xóa đơn hàng</h6>
+        <p>Bạn có chắc chắn muốn xóa đơn hàng #{orderId}?</p>
+        <div className="d-flex justify-content-end mt-3">
+          <button 
+            className="btn btn-sm btn-secondary me-2"
+            onClick={() => toast.dismiss()}
+          >
+            Hủy
+          </button>
+          <button
+            className="btn btn-sm btn-danger"
+            onClick={async () => {
+              toast.dismiss();
+              try {
+                const result = await dispatch(deleteOrder(orderId)).unwrap();
+                if (result.success) {
+                  toast.success(`Đã xóa đơn hàng #${orderId} thành công!`, {
+                    position: "top-right",
+                    autoClose: 3000
+                  });
+                  loadOrders();
+                } else {
+                  throw new Error(result.message);
+                }
+              } catch (error) {
+                toast.error(`Không thể xóa đơn hàng #${orderId}. ${error.message || ''}`, {
+                  position: "top-right",
+                  autoClose: 4000
+                });
+              }
+            }}
+          >
+            Xóa
+          </button>
+        </div>
+      </div>,
+      {
+        position: "top-center",
+        autoClose: false,
+        closeButton: false
       }
-    }
+    );
   };
 
   const handleCloseModal = () => {
@@ -81,36 +132,49 @@ const Order = () => {
 
   const handleSave = async (formData) => {
     try {
-      const url = selectedOrder 
-        ? `/api/orders/${selectedOrder.id}`
-        : '/api/orders';
-      
-      const method = selectedOrder ? 'PUT' : 'POST';
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
+      if (selectedOrder) {
+        toast.info('Đang cập nhật đơn hàng...', {
+          position: "top-right",
+          autoClose: 1000
+        });
 
-      const data = await response.json();
-      
-      if (data.success) {
-        toast.success(
-          selectedOrder 
-            ? 'Cập nhật đơn hàng thành công'
-            : 'Tạo đơn hàng thành công'
-        );
-        setShowModal(false);
-        setSelectedOrder(null);
-        loadOrders();
+        const result = await dispatch(updateOrder({
+          id: selectedOrder.id,
+          orderData: {
+            user_name: formData.user_name,
+            user_email: formData.user_email,
+            user_phone: formData.user_phone,
+            shipping_address: formData.shipping_address,
+            status: formData.status,
+            total_amount: formData.total_amount,
+            items: formData.items.map(item => ({
+              product_id: item.product_id,
+              product_name: item.product_name,
+              quantity: item.quantity,
+              price: item.price
+            }))
+          }
+        })).unwrap();
+
+        if (result.success) {
+          toast.success(`Đã cập nhật đơn hàng #${selectedOrder.id} thành công!`, {
+            position: "top-right",
+            autoClose: 3000
+          });
+          setShowModal(false);
+          setSelectedOrder(null);
+          loadOrders();
+        } else {
+          throw new Error(result.message || 'Failed to update order');
+        }
       } else {
-        throw new Error(data.message || 'Failed to save order');
+        toast.info('Chức năng tạo đơn hàng mới chưa được triển khai');
       }
     } catch (error) {
-      toast.error('Có lỗi xảy ra khi lưu đơn hàng');
+      toast.error(`Lỗi cập nhật đơn hàng: ${error.message || 'Đã xảy ra lỗi không xác định'}`, {
+        position: "top-right",
+        autoClose: 4000
+      });
     }
   };
 
@@ -196,7 +260,17 @@ const Order = () => {
         order={selectedOrder}
       />
       
-      <ToastContainer position="bottom-right" />
+      <ToastContainer 
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </Layout>
   );
 };
