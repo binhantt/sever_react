@@ -22,6 +22,10 @@ const CategoryModal = ({
     image_url: '',
     parent_id: ''
   });
+  // Xóa dòng console.log này
+  console.log(formData);
+  // Và xóa dòng console.log trong hàm submit
+  console.log('Dữ liệu sẽ gửi lên API:', formData);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragActive, setDragActive] = useState(false);
@@ -37,7 +41,7 @@ const CategoryModal = ({
         image: category.image || '',
         image_url: category.image || '',
         parent_name: category.parent_name || '',
-        parent_id: category.parent_id || '' // Make sure this is included
+        parent_id: category.parent_id !== undefined ? category.parent_id : null // Thay đổi ở đây
       });
     } else {
       setFormData({
@@ -46,7 +50,7 @@ const CategoryModal = ({
         active: true,
         image: '',
         image_url: '',
-        parent_id: ''
+        parent_id: null // Thay đổi ở đây
       });
     }
   }, [category]);
@@ -133,9 +137,13 @@ const CategoryModal = ({
                 <Form.Label className="fw-medium">Danh mục cha</Form.Label>
                 <Form.Select
                   name="parent_id"
-                  value={formData.parent_id}
-                  onChange={handleChange}
+                  value={formData.parent_id || ''} // Thêm fallback cho trường hợp null
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? null : e.target.value;
+                    setFormData(prev => ({ ...prev, parent_id: value }));
+                  }}
                 >
+                  <option value="">-- Không chọn --</option>
                   {categoriesManin(formData.parent_name, parentCategories).map(parent => (
                     <option key={parent.id} value={parent.id}>
                       {parent.name.replace(/\r\n/g, ' ')}

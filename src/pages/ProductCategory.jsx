@@ -34,7 +34,7 @@ import { fetchParentCategories } from '../store/Api/ParentCategory.Api';
     },
     parentCategories: state.parentCategory?.data || [] // Add this line
   }));
-  
+
   const [showModal, setShowModal] = useState(false);
   const [currentCategory, setCurrentCategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -76,9 +76,7 @@ import { fetchParentCategories } from '../store/Api/ParentCategory.Api';
     const timer = setTimeout(() => {
       fetchData();
       dispatch(fetchParentCategories()).then(() => {
-        // Remove these lines:
-        // console.log('Parent categories after fetch:', parentCategories);
-        // console.log('Parent Categories:', parentCategories);
+      
       });
     }, 500);
     return () => clearTimeout(timer);
@@ -90,7 +88,7 @@ import { fetchParentCategories } from '../store/Api/ParentCategory.Api';
 
   const handleEdit = (category) => {
     const currentData = [...virtualData];
-    setCurrentCategory(category);
+
     setShowModal(true);
     
     return () => {
@@ -150,14 +148,14 @@ import { fetchParentCategories } from '../store/Api/ParentCategory.Api';
         const updatedData = {
           ...currentCategory,
           ...formData,
-          parent_id: formData.parent_id || currentCategory.parent_id
+          parent_id: formData.parent_id || null // Convert empty string to null
         };
-  
+    
         if (formData.parent_id && formData.parent_id !== currentCategory.parent_id) {
           const parent = parentCategories.find(p => p.id === formData.parent_id);
           updatedData.parent_name = parent ? parent.name : currentCategory.parent_name;
         }
-  
+    
         await dispatch(updateCategory({
           id: currentCategory.id,
           categoryData: updatedData
@@ -175,10 +173,13 @@ import { fetchParentCategories } from '../store/Api/ParentCategory.Api';
         setCurrentCategory(null);
         
         toast.success('Cập nhật danh mục thành công');
+      } else {
+        await dispatch(addCategory(formData));
+        toast.success('Thêm danh mục thành công');
+        fetchData(); // Refresh data
       }
     } catch (error) {
-      console.error('Update error:', error);
-      toast.error('Có lỗi xảy ra khi cập nhật dữ liệu');
+      toast.error('Thêm danh mục thất bại');
     }
   }; 
   if (loading) {

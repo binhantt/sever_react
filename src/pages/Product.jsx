@@ -5,7 +5,7 @@ import { FaBox, FaSearch } from 'react-icons/fa';
 import ProductManagement from '../components/product/ProductManagement';
 import Breadcrumb from '../components/common/Breadcrumb';
 import ProductModal from '../components/product/ProductModal';
-import { toast , ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
@@ -31,71 +31,78 @@ const Product = () => {
     setCurrentProduct(null);
     setFormData({
       name: '',
-      description: '',
       price: 0,
-      stock: 0,
       sku: '',
-      weight: '',
-      dimensions: '',
-      is_active: 1,
+      description: '',
+      is_active: true,
+      manufacturer_id: '',
       main_image_url: '',
+      stock: 0,
+      weight: 0,
+      dimensions: '',
+      quantity: 0,
+      product_category_ids: [],
       images: [],
+      details: [],
       warranties: []
     });
     setShowModal(true);
   };
-  
+
   const handleEdit = (product) => {
     setCurrentProduct(product);
     setFormData({
-      name: product.name || '',
-      description: product.description || '',
-      price: product.price || 0,
-      stock: product.stock || 0,
-      sku: product.sku || '',
-      category_id: product.category_id || '',
-      weight: product.weight || '',
-      dimensions: product.dimensions || '',
-      is_active: product.is_active || 1,
-      main_image_url: product.main_image_url || '',
-      images: product.images || [],
-      warranties: product.warranties || []
+      name: product?.name || '',
+      description: product?.description || '',
+      price: product?.price || 0,
+      stock: product?.stock || 0,
+      sku: product?.sku || '',
+      category_id: product?.category_id || '',
+      weight: product?.weight || '',
+      dimensions: product?.dimensions || '',
+      is_active: product?.is_active || 1,
+      main_image_url: product?.main_image_url || '',
+      images: product?.images || [],
+      warranties: product?.warranties || [],
+      manufacturer_id: product?.manufacturer_id || '',
+      categories: product?.categories || [],
+      details: product?.details || []
     });
     setShowModal(true);
   };
 
   const handleDelete = (productId) => {
     toast.info(
-        <div>
-          <h6>Xác nhận xóa</h6>
-          <p>Bạn có chắc muốn xóa sản phẩm này?</p>
-          <div className="d-flex justify-content-end mt-3">
-            <Button 
-              variant="outline-secondary" 
-              size="sm" 
-              className="me-2"
-              onClick={() => toast.dismiss()}
-            >
-              Hủy
-            </Button>
-            <Button 
-              variant="danger" 
-              size="sm"
-              onClick={() => {
-                toast.dismiss();
-                dispatch(deleteProduct(productId)); // Sử dụng Redux action
-                toast.success('Đã xóa sản phẩm thành công!');
-              }}
-            >
-              Xóa
-            </Button>
-          </div>
-        </div>,
-        {
-          autoClose: false,
-          closeButton: false,
-        }
-      );
+      <div>
+        <h6>Xác nhận xóa</h6>
+        <p>Bạn có chắc muốn xóa sản phẩm này?</p>
+        <div className="d-flex justify-content-end mt-3">
+          <Button
+            variant="outline-secondary"
+            size="sm"
+            className="me-2"
+            onClick={() => toast.dismiss()}
+          >
+            Hủy
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={() => {
+              toast.dismiss();
+              dispatch(deleteProduct(productId)); // Sử dụng Redux action
+              toast.success('Đã xóa sản phẩm thành công!');
+            }}
+          >
+            Xóa
+          </Button>
+        </div>
+      </div>,
+      {
+        autoClose: false,
+        closeButton: false,
+      }
+    );
   };
 
   useEffect(() => {
@@ -142,12 +149,12 @@ const Product = () => {
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
-  
+
   return (
     <Layout>
       <Container fluid className="p-4">
-        <Breadcrumb 
-          title="Quản lý Sản phẩm" 
+        <Breadcrumb
+          title="Quản lý Sản phẩm"
           icon={FaBox}
           items={[
             { label: "Sản phẩm" },
@@ -166,8 +173,8 @@ const Product = () => {
                 className="me-2"
                 style={{ width: '250px' }}
               />
-              <Button 
-                variant="primary" 
+              <Button
+                variant="primary"
                 onClick={handleAddNew}
                 className="me-2"
               >
@@ -176,10 +183,10 @@ const Product = () => {
             </div>
           </Col>
         </Row>
-        
+
         <Row>
           <Col xs={12}>
-            <ProductManagement 
+            <ProductManagement
               products={products}
               onEdit={handleEdit}
               onDelete={handleDelete}

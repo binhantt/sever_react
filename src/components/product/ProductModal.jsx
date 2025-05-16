@@ -4,16 +4,90 @@ import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 import ApiConfig from '../../config/Api.config';
 import ImgBBConfig from '../../config/ImgBB.config';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchManufacturers } from '../../store/Api/manufacturers';
 
-const ProductModal = ({
-  show,
-  handleClose,
-  handleSubmit: onSubmit,
-  product = null,
-  isEditing = false,
-  handleChange,
-  formData,
-}) => {
+const ProductModal = ({ show, handleClose, isEditing, product }) => {
+  const dispatch = useDispatch();
+  const manufacturers = useSelector(state => state.manufacturers.data);
+  
+  useEffect(() => {
+    dispatch(fetchManufacturers());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!isEditing) {
+      setFormData({
+        name: '',
+        price: 0,
+        sku: '',
+        description: '',
+        is_active: true,
+        manufacturer_id: '',
+        main_image_url: '',
+        stock: 0,
+        weight: 0,
+        dimensions: '',
+        quantity: 0,
+        product_category_ids: [],
+        images: [],
+        details: [],
+        warranties: []
+      });
+      setPreviewImages([]);
+      setExistingImages([]);
+    } else if (product) {
+      setFormData({
+        name: product?.name || '',
+        description: product?.description || '',
+        price: product?.price || 0,
+        stock: product?.stock || 0,
+        sku: product?.sku || '',
+        category_id: product?.category_id || '',
+        weight: product?.weight || '',
+        dimensions: product?.dimensions || '',
+        is_active: product?.is_active || 1,
+        main_image_url: product?.main_image_url || '',
+        images: product?.images || [],
+        warranties: product?.warranties || [],
+        manufacturer_id: product?.manufacturer_id || '',
+        categories: product?.categories || [],
+        details: product?.details || []
+      });
+      setExistingImages(product.images.map(img => ({
+        id: img.id,
+        preview: img.image_url,
+        isExisting: true
+      })));
+    }
+  }, [isEditing, product]);
+
+  const [formData, setFormData] = useState({
+    name: '',
+    price: 0,
+    sku: '',
+    description: '',
+    is_active: true,
+    manufacturer_id: '',
+    main_image_url: '',
+    stock: 0,
+    weight: 0,
+    dimensions: '',
+    quantity: 0,
+    product_category_ids: [],
+    images: [],
+    details: [],
+    warranties: []
+  });
+
+  // Add this handleChange function
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const {
     name = '',
@@ -22,8 +96,15 @@ const ProductModal = ({
     stock = 0,
     is_active = 1,
     main_image_url = '',
-    category_id = '',
-    images = []
+    category_ids = [],
+    images = [],
+    
+    sku = '',
+    weight = '',
+    dimensions = '',
+    details = [],
+    warranties = [],
+    manufacturer_id = '' // Add this line with default empty string
   } = formData || {};
 
   const [previewImages, setPreviewImages] = useState([]);
@@ -38,7 +119,7 @@ const ProductModal = ({
     progress: 0,
     error: null
   });
-
+// Add to handleChange functio
   const imageGalleryStyles = {
     '.image-gallery .position-relative:hover': {
       transform: 'translateY(-5px)',
@@ -75,7 +156,7 @@ const ProductModal = ({
   }, []);
 
   useEffect(() => {
-    
+
     const safeCategories = Array.isArray(categories) ? categories : [];
     if (!isEditing) {
       setPreviewImages([]);
@@ -96,7 +177,7 @@ const ProductModal = ({
     const styleSheet = document.createElement('style');
     styleSheet.id = 'product-modal-styles';
     styleSheet.textContent = Object.entries(imageGalleryStyles)
-      .map(([selector, styles]) => 
+      .map(([selector, styles]) =>
         `${selector} {${Object.entries(styles)
           .map(([prop, value]) => `${prop}: ${value}`)
           .join(';')}}`
@@ -130,7 +211,7 @@ const ProductModal = ({
 
   const handleAddImage = () => {
     if (!imageUrl.trim()) return;
-    
+
     const newImages = [...(formData.images || [])];
     const newImageData = {
       image_url: imageUrl,
@@ -138,16 +219,16 @@ const ProductModal = ({
       sort_order: newImages.length + 1,
       created_at: new Date().toISOString()
     };
-    
+
     newImages.push(newImageData);
-    
+
     handleChange({
       target: {
         name: 'images',
         value: newImages
       }
     });
-    
+
     setImageUrl('');
   };
 
@@ -163,7 +244,7 @@ const ProductModal = ({
   const removeImage = (index) => {
     const newImages = [...(formData.images || [])];
     const removedImage = newImages[index];
-    
+
     // If removing the main image, clear main_image_url
     if (removedImage && removedImage.image_url === formData.main_image_url) {
       handleChange({
@@ -173,7 +254,7 @@ const ProductModal = ({
         }
       });
     }
-    
+
     newImages.splice(index, 1);
     handleChange({
       target: {
@@ -188,11 +269,11 @@ const ProductModal = ({
     const { name, value } = e.target;
     const warranties = formData.warranties || [];
     const updatedWarranties = [...warranties];
-    
+
     if (!updatedWarranties[index]) {
       updatedWarranties[index] = {};
     }
-    
+
     updatedWarranties[index] = {
       ...updatedWarranties[index],
       [name]: value
@@ -289,7 +370,7 @@ const ProductModal = ({
 
       const uploadedUrls = await Promise.all(uploadPromises);
       const validUrls = uploadedUrls.filter(url => url !== null);
-      
+
       if (validUrls.length > 0) {
         const newImages = validUrls.map(url => ({
           image_url: url,
@@ -335,7 +416,6 @@ const ProductModal = ({
       <Modal.Header closeButton>
         <Modal.Title>{isEditing ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}</Modal.Title>
       </Modal.Header>
-      <Form onSubmit={handleFormSubmit}>
         <Modal.Body style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 150px)', backgroundColor: '#f8f9fa' }}>
           <div className="container-fluid">
             <div className="row g-4">
@@ -343,25 +423,25 @@ const ProductModal = ({
               <div className="col-md-4">
                 <div className="bg-white p-4 rounded shadow-sm h-100">
                   <h5 className="mb-4 text-primary">Thông tin chung</h5>
-                <Form.Group className="mb-3">
+                  <Form.Group className="mb-3">
                     <Form.Label className="fw-bold">Tên sản phẩm</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="name"
-                    value={name}
-                    onChange={handleChange}
-                    required
-                  />
-                </Form.Group>
+                    <Form.Control
+                      type="text"
+                      name="name"
+                      value={name}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
 
                   <Form.Group className="mb-4">
                     <Form.Label className="fw-bold">Danh mục sản phẩm</Form.Label>
                   <Form.Select
                     name="category_id"
-                    value={category_id}
+                    value={category_ids}
                     onChange={handleChange}
                     required
-                      className="border-secondary"
+                    className="border-secondary"
                   >
                     <option value="">Chọn danh mục</option>
                     {Array.isArray(categories) && categories.map((category) => (
@@ -370,46 +450,112 @@ const ProductModal = ({
                       </option>
                     ))}
                   </Form.Select>
+                  <div className="mt-2 d-flex flex-wrap gap-2" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                    {category_ids.map((id) => {
+                      const category = categories.find(c => c.id === Number(id));
+                      return (
+                        <span key={id} className="badge bg-primary text-white">
+                          {category ? category.name : `ID ${id}`}
+                          <button 
+                            type="button" 
+                            className="btn-close btn-close-white ms-2" 
+                            aria-label="Remove"
+                            onClick={() => {
+                              handleChange({
+                                target: {
+                                  name: 'category_ids',
+                                  value: category_ids.filter(cid => cid !== id)
+                                }
+                              });
+                            }}
+                          />
+                        </span>
+                      );
+                    })}
+                  </div>
+                  </Form.Group>          
+                       <div className="mt-2 d-flex flex-wrap gap-2">
+                        {category_ids.map((id) => {
+                          const category = categories.find(c => c.id === Number(id));
+                          return (
+                            <span key={id} className="badge bg-primary text-white">
+                              {category ? category.name : `ID ${id}`}
+                              <button 
+                                type="button" 
+                                className="btn-close btn-close-white ms-2" 
+                                aria-label="Remove"
+                                onClick={() => {
+                                  handleChange({
+                                    target: {
+                                      name: 'category_ids',
+                                      value: category_ids.filter(cid => cid !== id)
+                                    }
+                                  });
+                                }}
+                              />
+                            </span>
+                          );
+                        })}
+                      </div>
+      
+
+
+                  <Form.Group className="mb-3">
+                    <Form.Label className="fw-bold">Nhà sản xuất</Form.Label>
+                    <Form.Select
+                      name="manufacturer_id"
+                      value={manufacturer_id || ''}
+                      onChange={handleChange}
+                      className="border-secondary"
+                    >
+                      <option value="">Chọn nhà sản xuất</option>
+                      {(manufacturers.data || []).map(manufacturer => (
+
+                      <option key={manufacturer.id} value={manufacturer.id}>
+                        {manufacturer.name}
+                      </option>
+                      ))}
+                    </Form.Select>
                   </Form.Group>
 
-                <Form.Group className="mb-3">
+                  <Form.Group className="mb-3">
                     <Form.Label className="fw-bold">Mô tả</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    name="description"
-                    value={description}
+                    <Form.Control
+                      as="textarea"
+                      name="description"
+                      value={description}
                       onChange={handleChange}
-                    rows={3}
+                      rows={3}
                       className="border-secondary"
-                  />
-                </Form.Group>
+                    />
+                  </Form.Group>
 
                   <div className="row g-3">
                     <div className="col-6">
                       <Form.Group>
                         <Form.Label className="fw-bold">Giá</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="price"
-                    value={price}
+                        <Form.Control
+                          type="number"
+                          name="price"
+                          value={price}
                           onChange={handleChange}
-                    required
+                          required
                           className="border-secondary"
-                  />
-                </Form.Group>
+                        />
+                      </Form.Group>
                     </div>
                     <div className="col-6">
                       <Form.Group>
                         <Form.Label className="fw-bold">Số lượng tồn kho</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="stock"
-                    value={stock}
+                        <Form.Control
+                          type="number"
+                          name="stock"
+                          value={stock}
                           onChange={handleChange}
-                    required
+                          required
                           className="border-secondary"
-                  />
-                </Form.Group>
+                        />
+                      </Form.Group>
                     </div>
                   </div>
                 </div>
@@ -422,7 +568,7 @@ const ProductModal = ({
                     <i className="fas fa-images me-2"></i>
                     Quản lý hình ảnh
                   </h5>
-                  
+
                   {/* Ảnh chính */}
                   <div className="mb-4">
                     <h6 className="fw-bold mb-3 d-flex align-items-center">
@@ -456,7 +602,7 @@ const ProductModal = ({
                           </Button>
                         </div>
                       ) : (
-                        <div 
+                        <div
                           className="d-flex align-items-center justify-content-center"
                           style={{
                             width: '100%',
@@ -494,7 +640,7 @@ const ProductModal = ({
                       <i className="fas fa-plus-circle me-2 text-success"></i>
                       Thêm ảnh sản phẩm
                     </h6>
-                    
+
                     {/* Upload Zone */}
                     <div
                       {...getRootProps()}
@@ -517,8 +663,8 @@ const ProductModal = ({
                           </>
                         ) : (
                           <>
-                            <i className={`fas fa-${isDragActive ? 'file-import' : 'cloud-upload-alt'} mb-2`} 
-                               style={{ fontSize: '2rem', color: isDragActive ? '#0d6efd' : '#6c757d' }}></i>
+                            <i className={`fas fa-${isDragActive ? 'file-import' : 'cloud-upload-alt'} mb-2`}
+                              style={{ fontSize: '2rem', color: isDragActive ? '#0d6efd' : '#6c757d' }}></i>
                             <p className="mb-1" style={{ color: isDragActive ? '#0d6efd' : 'inherit' }}>
                               {isDragActive
                                 ? 'Thả ảnh vào đây...'
@@ -543,14 +689,14 @@ const ProductModal = ({
                       <span className="input-group-text bg-light border-secondary">
                         <i className="fas fa-link"></i>
                       </span>
-                  <Form.Control
-                    type="text"
+                      <Form.Control
+                        type="text"
                         placeholder="Hoặc nhập URL ảnh..."
                         value={imageUrl}
                         onChange={(e) => setImageUrl(e.target.value)}
                         className="border-secondary"
                       />
-                      <Button 
+                      <Button
                         variant="primary"
                         onClick={handleAddImage}
                         disabled={!imageUrl.trim()}
@@ -559,19 +705,19 @@ const ProductModal = ({
                         Thêm
                       </Button>
                     </div>
-                    
+
                     {/* Image Gallery */}
                     <div className="image-gallery">
                       <div className="d-flex flex-wrap gap-3">
                         {(formData.images || []).map((img, index) => (
-                          <div 
-                            key={img.id || index} 
+                          <div
+                            key={img.id || index}
                             className="position-relative"
                             style={{
                               width: '120px',
                               height: '120px',
-                              border: img.image_url === main_image_url 
-                                ? '2px solid #ffc107' 
+                              border: img.image_url === main_image_url
+                                ? '2px solid #ffc107'
                                 : '2px solid #dee2e6',
                               borderRadius: '8px',
                               overflow: 'hidden',
@@ -599,9 +745,9 @@ const ProductModal = ({
                                 e.stopPropagation();
                                 removeImage(index);
                               }}
-                              style={{ 
-                                width: '24px', 
-                                height: '24px', 
+                              style={{
+                                width: '24px',
+                                height: '24px',
                                 padding: '0',
                                 fontSize: '12px',
                                 zIndex: 2
@@ -610,7 +756,7 @@ const ProductModal = ({
                               <i className="fas fa-times"></i>
                             </Button>
                             {/* Overlay with additional actions */}
-                            <div 
+                            <div
                               className="position-absolute bottom-0 start-0 w-100 p-1"
                               style={{
                                 background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
@@ -655,62 +801,62 @@ const ProductModal = ({
                 <div className="bg-white p-4 rounded shadow-sm mb-4">
                   <h5 className="mb-4 text-primary">Thông tin chi tiết</h5>
                   <Form.Group className="mb-4">
-                  <Form.Check
-                    type="checkbox"
-                    label="Hoạt động"
-                    name="is_active"
-                    checked={is_active === 1}
-                    onChange={(e) => handleChange({
-                      target: {
-                        name: 'is_active',
-                        value: e.target.checked ? 1 : 0
-                      }
-                    })}
+                    <Form.Check
+                      type="checkbox"
+                      label="Hoạt động"
+                      name="is_active"
+                      checked={is_active === 1}
+                      onChange={(e) => handleChange({
+                        target: {
+                          name: 'is_active',
+                          value: e.target.checked ? 1 : 0
+                        }
+                      })}
                       className="fw-bold"
-                  />
-                </Form.Group>
+                    />
+                  </Form.Group>
 
                   <div className="row g-3">
                     <div className="col-12">
                       <Form.Group>
                         <Form.Label className="fw-bold">SKU</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="sku"
-                    value={formData.sku || ''}
-                    onChange={handleChange}
+                        <Form.Control
+                          type="text"
+                          name="sku"
+                          value={formData.sku || ''}
+                          onChange={handleChange}
                           className="border-secondary"
-                  />
-                </Form.Group>
+                        />
+                      </Form.Group>
                     </div>
                     <div className="col-6">
                       <Form.Group>
                         <Form.Label className="fw-bold">Trọng lượng (kg)</Form.Label>
-                  <Form.Control
-                    type="number"
-                    name="weight"
-                    value={formData.weight || ''}
-                    onChange={handleChange}
-                    step="0.01"
+                        <Form.Control
+                          type="number"
+                          name="weight"
+                          value={formData.weight || ''}
+                          onChange={handleChange}
+                          step="0.01"
                           className="border-secondary"
-                  />
-                </Form.Group>
+                        />
+                      </Form.Group>
                     </div>
                     <div className="col-6">
                       <Form.Group>
                         <Form.Label className="fw-bold">Kích thước</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="dimensions"
-                    value={formData.dimensions || ''}
-                    onChange={handleChange}
+                        <Form.Control
+                          type="text"
+                          name="dimensions"
+                          value={formData.dimensions || ''}
+                          onChange={handleChange}
                           placeholder="160.9 x 77.8 x 8.3 mm"
                           className="border-secondary"
-                  />
-                </Form.Group>
+                        />
+                      </Form.Group>
                     </div>
                   </div>
-              </div>
+                </div>
 
                 <div className="bg-white p-4 rounded shadow-sm">
                   <div className="d-flex justify-content-between align-items-center mb-4">
@@ -719,7 +865,7 @@ const ProductModal = ({
                       + Thêm bảo hành
                     </Button>
                   </div>
-                  
+
                   {(formData.warranties || []).map((warranty, index) => (
                     <div key={index} className="border rounded p-3 mb-3 position-relative bg-light">
                       <Button
@@ -766,7 +912,7 @@ const ProductModal = ({
                       </Form.Group>
                     </div>
                   ))}
-                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -779,10 +925,11 @@ const ProductModal = ({
             {isEditing ? 'Cập nhật' : 'Thêm mới'}
           </Button>
         </Modal.Footer>
-      </Form>
+
     </Modal>
   );
 };
 
 
 export default ProductModal;
+
