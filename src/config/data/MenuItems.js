@@ -8,6 +8,7 @@ import {
   FaInfoCircle,
   FaLayerGroup 
 } from 'react-icons/fa';
+import { FaIndustry } from 'react-icons/fa';
 
 const menuItems = [
   {
@@ -19,6 +20,11 @@ const menuItems = [
     path: "/parent-categories",
     name: "Danh mục cha",
     icon: { component: FaLayerGroup, size: 16 }
+  },
+  {
+    path: "/manufacturers",
+    name: "Nhà sản xuất",
+    icon: { component: FaIndustry, size: 16 }
   },
   {
     path: "/categories",

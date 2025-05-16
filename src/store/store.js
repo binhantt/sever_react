@@ -6,6 +6,7 @@ import ProducIntroReducer from './Slice/ProductIntro';
 import ProducReducter from './Slice/Product';
 import orderReducer from './Slice/order';
 import parentCategoryReducer from './Slice/ParentCategory.Slice';
+import manufacturersReducer from './Slice/Manufacturer';
 export const store = configureStore({
   reducer: {
     admin: adminReducer, 
@@ -15,5 +16,6 @@ export const store = configureStore({
     product: ProducReducter,
     order: orderReducer, 
     parentCategory: parentCategoryReducer,
+    manufacturers: manufacturersReducer,
   }
 });

@@ -5,12 +5,12 @@ import Login from './pages/Login';
 import User from './pages/USer';
 import Order from './pages/Order';
 import Product from './pages/Product';
+import Manufacturers from './pages/manufacturers';
 import Stats from './pages/Stats';
 import ProductCategory from './pages/ProductCategory';
 import { useSelector, useDispatch } from 'react-redux';
 import { loginSuccess } from './store/Slice/Login';
 import Logout from './pages/Logout';
-import CategoryList from './components/category/CategoryList';
 import ProductIntro from './pages/ProductIntro';
 import ParentCategory from './pages/ParentCategory';
 
@@ -45,7 +45,10 @@ function App() {
           path="/products" 
           element={user ? <Product /> : <Navigate to="/" />} 
         />
-     
+        <Route 
+          path="/manufacturers" 
+          element={user ? <Manufacturers /> : <Navigate to="/" />} 
+        />
         <Route 
           path="/categories" 
           element={user ? <ProductCategory /> : <Navigate to="/" />} 
