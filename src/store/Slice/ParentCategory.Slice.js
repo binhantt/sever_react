@@ -6,14 +6,6 @@ import {
   deleteParentCategory
 } from '../Api/ParentCategory.Api';
 
-const initialState = {
-  data: [],
-  loading: false,
-  error: null,
-  currentCategory: null
-};
-
-// Check the reducer is properly updating state
 const parentCategorySlice = createSlice({
   name: 'parentCategory',
   initialState: {
@@ -21,10 +13,13 @@ const parentCategorySlice = createSlice({
     loading: false,
     error: null
   },
+  reducers: {},
   extraReducers: (builder) => {
+    // Handle all action types properly
     builder
       .addCase(fetchParentCategories.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchParentCategories.fulfilled, (state, action) => {
         state.loading = false;
@@ -32,10 +27,11 @@ const parentCategorySlice = createSlice({
       })
       .addCase(fetchParentCategories.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload?.message || action.error.message;
       });
+    
+    // Add similar handlers for other CRUD operations
   }
 });
 
-export const { setCurrentParentCategory, clearErrors } = parentCategorySlice.actions;
 export default parentCategorySlice.reducer;

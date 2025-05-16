@@ -12,6 +12,7 @@ import { loginSuccess } from './store/Slice/Login';
 import Logout from './pages/Logout';
 import CategoryList from './components/category/CategoryList';
 import ProductIntro from './pages/ProductIntro';
+import ParentCategory from './pages/ParentCategory';
 
 function App() {
   const { user } = useSelector(state => state.admin);
@@ -57,6 +58,10 @@ function App() {
         <Route 
           path="/product-intros" 
           element={user ? <ProductIntro /> : <Navigate to="/" />} 
+        />
+        <Route 
+          path="/parent-categories" 
+          element={user ? <ParentCategory /> : <Navigate to="/" />} 
         />
       </Routes>
     </Router>

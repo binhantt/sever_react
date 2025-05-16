@@ -1,10 +1,24 @@
-import { FaHome, FaUsers, FaShoppingCart, FaClipboardList, FaChartBar, FaCog, FaInfoCircle } from 'react-icons/fa';
+import { 
+  FaHome, 
+  FaUsers, 
+  FaShoppingCart, 
+  FaClipboardList, 
+  FaChartBar, 
+  FaCog, 
+  FaInfoCircle,
+  FaLayerGroup 
+} from 'react-icons/fa';
 
 const menuItems = [
   {
     path: "/home",
     name: "Trang chủ",
     icon: { component: FaHome, size: 16 }
+  },
+  {
+    path: "/parent-categories",
+    name: "Danh mục cha",
+    icon: { component: FaLayerGroup, size: 16 }
   },
   {
     path: "/categories",
