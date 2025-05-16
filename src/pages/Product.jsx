@@ -47,6 +47,7 @@ const Product = () => {
       warranties: []
     });
     setShowModal(true);
+    console.log('Form data:', formData); // Log form data để kiểm tra
   };
 
   const handleEdit = (product) => {
@@ -118,6 +119,7 @@ const Product = () => {
   }, [showModal]);
 
   const handleSubmit = async (productData) => {
+  
     try {
       const formattedData = {
         ...productData,
@@ -197,7 +199,7 @@ const Product = () => {
       <ProductModal
         show={showModal}
         handleClose={() => setShowModal(false)}
-        handleSubmit={handleSubmit}
+        handleSubmit={handleSubmit} // Make sure this is passed
         product={currentProduct}
         isEditing={!!currentProduct}
         handleChange={handleInputChange}
