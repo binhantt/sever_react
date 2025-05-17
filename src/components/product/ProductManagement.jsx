@@ -44,6 +44,7 @@ const ProductManagement = ({ products = [], onEdit, onDelete }) => {
                   <td>
                     {product.main_image_url && (
                       <img 
+                        key={`main-${product.id}`}
                         src={product.main_image_url} 
                         alt={product.name}
                         style={{ width: '50px', height: '50px', objectFit: 'cover' }}
@@ -52,9 +53,9 @@ const ProductManagement = ({ products = [], onEdit, onDelete }) => {
                     {product.images && product.images.length > 0 && (
                       product.images.map((image, index) => (
                         <img 
-                          key={image.id}
+                          key={`${product.id}-${image.id || index}`}
                           src={image.image_url} 
-                          alt={product.name}
+                          alt={`${product.name}-${index}`}
                           style={{ width: '50px', height: '50px', objectFit: 'cover', marginLeft: '5px' }}
                         />
                       ))
