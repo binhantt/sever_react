@@ -2,11 +2,10 @@ import React from 'react';
 import { Form, Button } from 'react-bootstrap';
 
 const ProductDetails = ({ formData, handleChange }) => {
+  console.log(formData.warranty);
   const handleWarrantyChange = (index, e) => {
     const { name, value } = e.target;
     const warranties = formData.warranties || [];
-    
-    // Create new array if empty
     const updatedWarranties = warranties.length > 0 ? [...warranties] : [{}];
     
     if (!updatedWarranties[index]) {
@@ -127,34 +126,25 @@ const ProductDetails = ({ formData, handleChange }) => {
               <Form.Label className="fw-bold">Thời gian bảo hành</Form.Label>
               <Form.Control
                 type="text"
-                name="warranty_period"
                 value={warranty.warranty_period || ''}
-                onChange={(e) => handleWarrantyChange(index, e)}
-                placeholder="12 tháng"
-                className="border-secondary"
+                readOnly
               />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label className="fw-bold">Nhà cung cấp BH</Form.Label>
               <Form.Control
                 type="text"
-                name="warranty_provider"
                 value={warranty.warranty_provider || ''}
-                onChange={(e) => handleWarrantyChange(index, e)}
-                placeholder="Apple Vietnam"
-                className="border-secondary"
+                readOnly
               />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label className="fw-bold">Điều kiện BH</Form.Label>
               <Form.Control
                 as="textarea"
-                name="warranty_conditions"
                 value={warranty.warranty_conditions || ''}
-                onChange={(e) => handleWarrantyChange(index, e)}
+                readOnly
                 rows={2}
-                placeholder="Bảo hành chính hãng"
-                className="border-secondary"
               />
             </Form.Group>
           </div>

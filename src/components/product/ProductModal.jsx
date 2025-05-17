@@ -40,8 +40,6 @@ const ProductModal = ({ show, handleClose, product }) => {
 
 
   useEffect(() => {
-    // console.log('ProductModal useEffect - product prop:', product);
-    // console.log('ProductModal useEffect - categories:', categories);
     if (product) {
       setFormData({
         ...product,
