@@ -18,6 +18,7 @@ const categorySlice = createSlice({
     builder
       .addCase(getCategories.pending, (state) => {
         state.loading = true;
+        console.log('getCategories.pending');
       })
       .addCase(getCategories.fulfilled, (state, action) => {
         state.loading = false;
@@ -25,10 +26,13 @@ const categorySlice = createSlice({
         if (action.payload.pagination) {
           state.pagination = action.payload.pagination;
         }
+        console.log('getCategories.fulfilled - Payload:', action.payload);
+        console.log('getCategories.fulfilled - State data:', state.data);
       })
       .addCase(getCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        console.log('getCategories.rejected - Error:', action.payload);
       })
       // Xử lý addCategory
       .addCase(addCategory.fulfilled, (state, action) => {

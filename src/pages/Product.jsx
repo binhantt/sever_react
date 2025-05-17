@@ -10,7 +10,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { addProduct, updateProduct, getProducts, deleteProduct } from '../store/Api/Product';
-
+import { getCategories } from '../store/Api/Category';
+import { fetchManufacturers } from '../store/Api/manufacturers';
 const Product = () => {
   const [showModal, setShowModal] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
@@ -22,6 +23,7 @@ const Product = () => {
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     // Thêm logic xử lý đặc biệt nếu cần
+
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (checked ? 1 : 0) : value
@@ -109,8 +111,10 @@ const Product = () => {
   useEffect(() => {
     // Load danh sách sản phẩm khi component mount
     dispatch(getProducts());
+    dispatch(getCategories());
+    dispatch(fetchManufacturers());
   }, [dispatch]);
-
+console.log(categories)
   useEffect(() => {
     if (!showModal) {
       setFormData({});
