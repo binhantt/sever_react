@@ -179,14 +179,12 @@ const ImageManagement = ({ formData, handleChange }) => {
               <img
                 src={formData.main_image_url}
                 alt="Main product"
+                className="img-fluid rounded"
                 style={{
-                  width: '100%',
-                  height: '250px',
+                  maxHeight: '300px',
                   objectFit: 'contain',
                   border: '2px solid #dee2e6',
-                  borderRadius: '8px',
-                  backgroundColor: '#fff',
-                  transition: 'all 0.3s ease'
+                  backgroundColor: '#f8f9fa'
                 }}
               />
               <Button
@@ -194,27 +192,14 @@ const ImageManagement = ({ formData, handleChange }) => {
                 size="sm"
                 className="position-absolute top-0 end-0 m-2 rounded-circle"
                 onClick={handleMainImageDelete}
-                style={{ width: '28px', height: '28px', padding: '0' }}
               >
                 <i className="fas fa-times"></i>
               </Button>
             </div>
           ) : (
-            <div
-              className="d-flex align-items-center justify-content-center"
-              style={{
-                width: '100%',
-                height: '250px',
-                border: '2px dashed #dee2e6',
-                borderRadius: '8px',
-                backgroundColor: '#fff',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              <div className="text-center text-muted">
-                <i className="fas fa-image mb-2" style={{ fontSize: '2.5rem' }}></i>
-                <div>Chưa có ảnh chính</div>
-              </div>
+            <div className="text-center py-4 border rounded" style={{backgroundColor: '#f8f9fa'}}>
+              <i className="fas fa-image fa-3x text-muted mb-2"></i>
+              <p className="text-muted">Chưa có ảnh chính</p>
             </div>
           )}
         </div>
@@ -294,86 +279,41 @@ const ImageManagement = ({ formData, handleChange }) => {
 
         {/* Image Gallery */}
         <div className="image-gallery">
-          <div className="d-flex flex-wrap gap-3">
-            {(formData.images || []).map((img, index) => (
-              <div
-                key={img.id || index}
-                className="position-relative"
-                style={{
-                  width: '120px',
-                  height: '120px',
-                  border: img.url === formData.main_image_url
-                    ? '2px solid #ffc107'
-                    : '2px solid #dee2e6',
-                  borderRadius: '8px',
-                  overflow: 'hidden',
-                  cursor: 'pointer',
-                  backgroundColor: '#fff',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                <img
-                  src={img.url}
-                  alt={`Product ${index + 1}`}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                  onClick={() => setAsMainImage(img.url)}
-                />
-                <Button
-                  variant="danger"
-                  size="sm"
-                  className="position-absolute top-0 end-0 m-1 rounded-circle"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeImage(index);
-                  }}
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    padding: '0',
-                    fontSize: '12px',
-                    zIndex: 2
-                  }}
-                >
-                  <i className="fas fa-times"></i>
-                </Button>
-                <div
-                  className="position-absolute bottom-0 start-0 w-100 p-1"
-                  style={{
-                    background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
-                    transition: 'opacity 0.3s ease'
-                  }}
-                >
-                  <Button
-                    variant={img.url === formData.main_image_url ? "warning" : "light"}
-                    size="sm"
-                    className="w-100"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setAsMainImage(img.url);
-                    }}
+          <div className="mb-4">
+            <h6 className="fw-bold mb-3 d-flex align-items-center">
+              <i className="fas fa-images me-2"></i>
+              Hình ảnh sản phẩm
+            </h6>
+            <div className="d-flex flex-wrap gap-3">
+              {formData.images?.map((image, index) => (
+                <div key={index} className="position-relative" style={{width: '120px', height: '120px'}}>
+                  <img
+                    src={image.url}
+                    alt={`Product ${index + 1}`}
+                    className="img-thumbnail"
                     style={{
-                      fontSize: '12px'
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      border: image.url === formData.main_image_url 
+                        ? '2px solid #0d6efd' 
+                        : '1px solid #dee2e6',
+                      cursor: 'pointer'
                     }}
+                    onClick={() => setAsMainImage(image.url)}
+                  />
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    className="position-absolute top-0 end-0 m-1 rounded-circle"
+                    onClick={() => removeImage(index)}
+                    style={{width: '24px', height: '24px', padding: '0'}}
                   >
-                    {img.url === formData.main_image_url ? (
-                      <>
-                        <i className="fas fa-star me-1"></i>
-                        Ảnh chính
-                      </>
-                    ) : (
-                      <>
-                        <i className="far fa-star me-1"></i>
-                        Đặt làm ảnh chính
-                      </>
-                    )}
+                    <i className="fas fa-times"></i>
                   </Button>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -381,4 +321,4 @@ const ImageManagement = ({ formData, handleChange }) => {
   );
 };
 
-export default ImageManagement; 
+export default ImageManagement;

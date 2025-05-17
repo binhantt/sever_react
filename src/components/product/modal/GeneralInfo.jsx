@@ -2,8 +2,7 @@ import React from 'react';
 import { Form } from 'react-bootstrap';
 
 const GeneralInfo = ({ formData, handleChange, categories, manufacturers }) => {
-  console.log('GeneralInfo - categories prop:', categories);
-  console.log('GeneralInfo - manufacturers prop:', manufacturers);
+
   const cate = (Category , formData)=>{
     const categoryId = Number(formData.categoryId); // Ép về số, vì categoryId trong Category là số
     const matchedCategory = Category.find(cat => cat.id === categoryId);
@@ -31,7 +30,7 @@ const GeneralInfo = ({ formData, handleChange, categories, manufacturers }) => {
         <Form.Label className="fw-bold">Danh mục sản phẩm</Form.Label>
         <Form.Select
           name="id_categories"
-          value={formData.id_categories || ''}
+          value={formData.id_categories}
           onChange={handleChange}
           required
           className="border-secondary"
@@ -49,7 +48,7 @@ const GeneralInfo = ({ formData, handleChange, categories, manufacturers }) => {
         <Form.Label className="fw-bold">Nhà sản xuất</Form.Label>
         <Form.Select
           name="manufacturer_id"
-          value={formData.manufacturer_id || ''}
+          value={formData.manufacturer_id }
           onChange={handleChange}
           className="border-secondary"
         >
@@ -93,8 +92,8 @@ const GeneralInfo = ({ formData, handleChange, categories, manufacturers }) => {
             <Form.Label className="fw-bold">Số lượng tồn kho</Form.Label>
             <Form.Control
               type="number"
-              name="stock"
-              value={formData.stock}
+              name="quantity"
+              value={formData.quantity}
               onChange={handleChange}
               required
               className="border-secondary"

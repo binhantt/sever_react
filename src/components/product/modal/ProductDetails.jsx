@@ -5,8 +5,10 @@ const ProductDetails = ({ formData, handleChange }) => {
   const handleWarrantyChange = (index, e) => {
     const { name, value } = e.target;
     const warranties = formData.warranties || [];
-    const updatedWarranties = [...warranties];
-
+    
+    // Create new array if empty
+    const updatedWarranties = warranties.length > 0 ? [...warranties] : [{}];
+    
     if (!updatedWarranties[index]) {
       updatedWarranties[index] = {};
     }
@@ -249,4 +251,4 @@ const ProductDetails = ({ formData, handleChange }) => {
   );
 };
 
-export default ProductDetails; 
+export default ProductDetails;

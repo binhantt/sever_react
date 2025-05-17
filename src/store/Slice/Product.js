@@ -23,6 +23,7 @@ const productSlice = createSlice({
       .addCase(getProducts.fulfilled, (state, action) => {
         state.loading = false;
         state.data = action.payload.data || [];
+
         if (action.payload.pagination) {
           state.pagination = action.payload.pagination;
         }
@@ -37,9 +38,10 @@ const productSlice = createSlice({
       })
       // Xử lý updateProduct
       .addCase(updateProduct.fulfilled, (state, action) => {
-        const index = state.data.findIndex(p => p.id === action.payload.id);
+        const { id, data } = action.payload;
+        const index = state.data.findIndex(p => p.id === id);
         if (index !== -1) {
-          state.data[index] = action.payload;
+          state.data[index] = { ...state.data[index], ...data };
         }
       })
       // Xử lý deleteProduct

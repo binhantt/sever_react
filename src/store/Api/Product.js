@@ -32,23 +32,18 @@ export const deleteProduct = createAsyncThunk(
 export const updateProduct = createAsyncThunk(
   'product/update',
   async (payload, { rejectWithValue }) => {
-    console.log('updateProduct thunk received payload:', payload);
     try {
       const { id, productData } = payload;
-      console.log('updateProduct thunk - id:', id, 'productData:', productData);
       const response = await axios.put(
         `${ApiConfig.severAdmin}/products/update/${id}`,
         productData
       );
-      console.log('updateProduct thunk - response:', response.data);
-      return response.data.data;
+      return { id, data: response.data.data }; // Return both id and updated data
     } catch (error) {
-      console.error('updateProduct thunk - error:', error.response?.data || error.message);
-      return rejectWithValue(error.response?.data);
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
-
 export const getProducts = createAsyncThunk(
   'product/getAll',
   async (params = {}, { rejectWithValue }) => {

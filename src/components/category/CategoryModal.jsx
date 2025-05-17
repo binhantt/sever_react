@@ -22,6 +22,7 @@ const CategoryModal = ({
     image_url: '',
     parent_id: ''
   });
+  // Remove these lines:
   // Xóa dòng console.log này
   console.log(formData);
   // Và xóa dòng console.log trong hàm submit
@@ -32,28 +33,21 @@ const CategoryModal = ({
   useEffect(() => {
   }, [parentCategories]);
 
-  useEffect(() => {
-    if (category) {
-      setFormData({
-        name: category.name || '',
-        description: category.description || '',
-        active: category.active !== false,
-        image: category.image || '',
-        image_url: category.image || '',
-        parent_name: category.parent_name || '',
-        parent_id: category.parent_id !== undefined ? category.parent_id : null // Thay đổi ở đây
-      });
-    } else {
-      setFormData({
-        name: '',
-        description: '',
-        active: true,
-        image: '',
-        image_url: '',
-        parent_id: null // Thay đổi ở đây
-      });
-    }
-  }, [category]);
+    // Add debug logs to track props and state:
+    useEffect(() => {
+        console.log('Category prop changed:', category); // Debug log
+        if (category) {
+            setFormData({
+                name: category.name || '',
+                description: category.description || '',
+                active: category.active !== false,
+                image: category.image || '',
+                image_url: category.image || '',
+                parent_name: category.parent_name || '',
+                parent_id: category.parent_id !== undefined ? category.parent_id : null
+            });
+        }
+    }, [category]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

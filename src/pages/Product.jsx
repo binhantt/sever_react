@@ -23,7 +23,6 @@ const Product = () => {
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     // Thêm logic xử lý đặc biệt nếu cần
-
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (checked ? 1 : 0) : value
@@ -49,31 +48,8 @@ const Product = () => {
       warranties: []
     });
     setShowModal(true);
-    console.log('Form data:', formData); // Log form data để kiểm tra
+    // console.log('Form data:', formData); // Log form data để kiểm tra
   };
-
-  const handleEdit = (product) => {
-    setCurrentProduct(product);
-    setFormData({
-      name: product?.name || '',
-      description: product?.description || '',
-      price: product?.price || 0,
-      stock: product?.stock || 0,
-      sku: product?.sku || '',
-      category_id: product?.category_id || '',
-      weight: product?.weight || '',
-      dimensions: product?.dimensions || '',
-      is_active: product?.is_active || 1,
-      main_image_url: product?.main_image_url || '',
-      images: product?.images || [],
-      warranties: product?.warranties || [],
-      manufacturer_id: product?.manufacturer_id || '',
-      categories: product?.categories || [],
-      details: product?.details || []
-    });
-    setShowModal(true);
-  };
-
   const handleDelete = (productId) => {
     toast.info(
       <div>
@@ -114,7 +90,7 @@ const Product = () => {
     dispatch(getCategories());
     dispatch(fetchManufacturers());
   }, [dispatch]);
-console.log(categories)
+
   useEffect(() => {
     if (!showModal) {
       setFormData({});
@@ -122,37 +98,62 @@ console.log(categories)
     }
   }, [showModal]);
 
+  // Fix the handleSubmit function to remove duplicate getProducts calls
   const handleSubmit = async (productData) => {
+      try {
+          const formattedData = {
+              ...productData,
+              price: Number(productData.price),
+              stock: Number(productData.stock),
+              warrantyData: productData.warranties?.map(warranty => ({
+                  warranty_period: warranty.warranty_period || '',
+                  warranty_provider: warranty.warranty_provider || '',
+                  warranty_conditions: warranty.warranty_conditions || ''
+              })) || []
+          };
   
-    try {
-      const formattedData = {
-        ...productData,
-        price: Number(productData.price),
-        stock: Number(productData.stock),
-        warranties: productData.warranties?.map(warranty => ({
-          warranty_period: warranty.warranty_period || '',
-          warranty_provider: warranty.warranty_provider || '',
-          warranty_conditions: warranty.warranty_conditions || ''
-        })) || []
-      };
-
-      if (currentProduct) {
-        await dispatch(updateProduct({
-          id: currentProduct.id,
-          productData: formattedData
-        }));
-      } else {
-        await dispatch(addProduct(formattedData));
+          if (currentProduct) {
+              await dispatch(updateProduct({
+                  id: currentProduct.id,
+                  productData: formattedData
+              }));
+           
+          } else {
+              await dispatch(addProduct(formattedData));
+          }
+          
+          setShowModal(false);
+          await dispatch(getProducts()); // Single refresh call
+          toast.success(`Đã ${currentProduct ? 'cập nhật' : 'thêm'} sản phẩm thành công!`);
+      } catch (error) {
+          toast.error(`Lỗi khi ${currentProduct ? 'cập nhật' : 'thêm'} sản phẩm: ${error.message}`);
       }
-      setShowModal(false);
-      toast.success(`Đã ${currentProduct ? 'cập nhật' : 'thêm'} sản phẩm thành công!`);
-      // Refresh the products list after successful operation
-      dispatch(getProducts());
-    } catch (error) {
-      toast.error(`Lỗi khi ${currentProduct ? 'cập nhật' : 'thêm'} sản phẩm: ${error.message}`);
-    }
-  };
 
+  };
+  
+  // Also fix the handleEdit function to remove unnecessary getProducts call
+  const handleEdit = (product) => {
+      setCurrentProduct(product);
+      setFormData({
+          name: product?.name || '',
+          description: product?.description || '',
+          price: product?.price || 0,
+          stock: product?.stock || 0,
+          sku: product?.sku || '',
+          category_id: product?.category_id || '',
+          weight: product?.weight || '',
+          dimensions: product?.dimensions || '',
+          is_active: product?.is_active || 1,
+          main_image_url: product?.main_image_url || '',
+          images: product?.images || [],
+          warrantyData: product?.warranties || [],
+          manufacturer_id: product?.manufacturer_id || '',
+          categories: product?.categories || [],
+          details: product?.details || []
+      });
+      setShowModal(true);
+       dispatch(getProducts()); // Single refresh call
+  };
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 

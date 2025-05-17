@@ -54,14 +54,15 @@ import { fetchParentCategories } from '../store/Api/ParentCategory.Api';
       setVirtualData(data);
     }
   }, [data]);
-
+  
   const fetchData = async (params = {}) => {
     try {
-      await dispatch(getCategories({
+       await dispatch(getCategories({
         page: params.page || page,
         limit: params.limit || limit,
         search: params.search || debouncedSearchTerm
       }));
+    
     } catch (error) {
       if (error.response?.status === 429) {
         toast.error('Vui lòng chờ một lát trước khi thử lại');
@@ -71,6 +72,7 @@ import { fetchParentCategories } from '../store/Api/ParentCategory.Api';
       }
     }
   };
+ // Log parent categories to check if they are fetched and available
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -85,19 +87,22 @@ import { fetchParentCategories } from '../store/Api/ParentCategory.Api';
   const handlePageChange = (newPage) => {
     navigate(`/categories?page=${newPage}&limit=${limit}`);
   };
-
-  const handleEdit = (category) => {
-    const currentData = [...virtualData];
-
+ // Fix the handleEdit function (remove the return statement)
+const handleEdit = (category) => {
+    console.log('Editing category:', category); // Debug log
+    setCurrentCategory(category);
     setShowModal(true);
-    
-    return () => {
-      setVirtualData(currentData);
-      setShowModal(false);
-      setCurrentCategory(null);
-    };
-  };
-  
+};
+
+// Also fix the duplicate fetchParentCategories call in useEffect
+useEffect(() => {
+    const timer = setTimeout(() => {
+        fetchData();
+        dispatch(fetchParentCategories()); // Remove the .then() as it's unnecessary
+    }, 500);
+    return () => clearTimeout(timer);
+}, [dispatch, page, limit, debouncedSearchTerm]);
+
   const handleDelete = (id) => {
     const oldData = [...virtualData];
     
@@ -305,7 +310,8 @@ import { fetchParentCategories } from '../store/Api/ParentCategory.Api';
           setCurrentCategory(null);
         }}
         handleSubmit={handleSubmit}
-        category={currentCategory}
+
+      category={currentCategory}
         isEditing={!!currentCategory}
         parentCategories={parentCategories} // Only pass once here
       />

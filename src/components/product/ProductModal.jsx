@@ -15,6 +15,7 @@ const ProductModal = ({ show, handleClose, product }) => {
   const dispatch = useDispatch();
   const { data: categories } = useSelector(state => state.category);
   const { data: manufacturers } = useSelector(state => state.manufacturers);
+  // In the initial formData state:
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -30,13 +31,17 @@ const ProductModal = ({ show, handleClose, product }) => {
     main_image_url: '',
     images: [],
     details: [],
-    warranties: []
+    warranties: [{
+      warranty_period: '',
+      warranty_provider: '',
+      warranty_conditions: ''
+    }]
   });
 
 
   useEffect(() => {
-    console.log('ProductModal useEffect - product prop:', product);
-    console.log('ProductModal useEffect - categories:', categories);
+    // console.log('ProductModal useEffect - product prop:', product);
+    // console.log('ProductModal useEffect - categories:', categories);
     if (product) {
       setFormData({
         ...product,
@@ -77,14 +82,12 @@ const ProductModal = ({ show, handleClose, product }) => {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
-
-    // Validate required fields
-    if (!formData.name || !formData.price || !formData.stock || !formData.id_categories) {
-      toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
-      return;
-    }
-
-    // Format data for API
+    
+    // Ensure we have the product id when updating
+    const productId = product?.id;
+    console.log('Product ID:', productId); // Debug log
+    
+    // In the handleFormSubmit function:
     const submitData = {
       ...formData,
       price: Number(formData.price),
@@ -99,21 +102,27 @@ const ProductModal = ({ show, handleClose, product }) => {
         spec_value: detail.spec_value,
         sort_order: detail.sort_order || 1
       })),
-      warranties: formData.warranties.map(warranty => ({
-        warranty_period: warranty.warranty_period,
-        warranty_provider: warranty.warranty_provider,
-        warranty_conditions: warranty.warranty_conditions
-      }))
+      warranties: formData.warranties
+        .filter(w => w.warranty_period || w.warranty_provider || w.warranty_conditions)
+        .map(warranty => ({
+          warranty_period: warranty.warranty_period || null,
+          warranty_provider: warranty.warranty_provider || null,
+          warranty_conditions: warranty.warranty_conditions || null
+        }))
     };
 
     console.log('Submitting data:', submitData);
    
 
     if (product) {
-      dispatch(updateProduct(product.id, submitData));
+      dispatch(updateProduct({ 
+        id: productId, 
+        productData: submitData 
+      }));
     } else {
       dispatch(addProduct(submitData));
     }
+    
     handleClose();
   };
 
@@ -149,8 +158,8 @@ const ProductModal = ({ show, handleClose, product }) => {
         <Button variant="secondary" onClick={handleClose}>
           Hủy
         </Button>
-        <Button variant="primary" type="submit">
-            {product ? 'Cập nhật' : 'Thêm mới'}
+        <Button  variant="primary" type="submit">
+            {product ? 'Cập nhật' : 'Thêm mới'} 
         </Button>
       </Modal.Footer>
       </Form>
