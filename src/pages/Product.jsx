@@ -12,44 +12,25 @@ import { useDispatch } from 'react-redux';
 import { addProduct, updateProduct, getProducts, deleteProduct } from '../store/Api/Product';
 import { getCategories } from '../store/Api/Category';
 import { fetchManufacturers } from '../store/Api/manufacturers';
+
 const Product = () => {
   const [showModal, setShowModal] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
-  const [formData, setFormData] = useState({});
   const dispatch = useDispatch();
   const { data: products = [], loading, error } = useSelector(state => state.product);
   const { data: categories = [] } = useSelector(state => state.category);
 
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    // Thêm logic xử lý đặc biệt nếu cần
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (checked ? 1 : 0) : value
-    }));
-  };
+  useEffect(() => {
+    dispatch(getProducts());
+    dispatch(getCategories());
+    dispatch(fetchManufacturers());
+  }, [dispatch]);
+
   const handleAddNew = () => {
     setCurrentProduct(null);
-    setFormData({
-      name: '',
-      price: 0,
-      sku: '',
-      description: '',
-      is_active: true,
-      manufacturer_id: '',
-      main_image_url: '',
-      stock: 0,
-      weight: 0,
-      dimensions: '',
-      quantity: 0,
-      product_category_ids: [],
-      images: [],
-      details: [],
-      warranties: []
-    });
     setShowModal(true);
-    // console.log('Form data:', formData); // Log form data để kiểm tra
   };
+
   const handleDelete = (productId) => {
     toast.info(
       <div>
@@ -69,7 +50,7 @@ const Product = () => {
             size="sm"
             onClick={() => {
               toast.dismiss();
-              dispatch(deleteProduct(productId)); // Sử dụng Redux action
+              dispatch(deleteProduct(productId));
               toast.success('Đã xóa sản phẩm thành công!');
             }}
           >
@@ -84,76 +65,93 @@ const Product = () => {
     );
   };
 
-  useEffect(() => {
-    // Load danh sách sản phẩm khi component mount
-    dispatch(getProducts());
-    dispatch(getCategories());
-    dispatch(fetchManufacturers());
-  }, [dispatch]);
+  const handleEdit = (product) => {
+    // Format the product data for editing
+    const formattedProduct = {
+      ...product,
+      quantity: product.quantity || 1,
+      id_categories: Number(product.id_categories) || (product.categories ? Number(product.categories.id) : ''),
+      manufacturer_id: Number(product.manufacturer_id) || (product.manufacturers ? Number(product.manufacturers.id) : ''),
+      images: product.images || [],
+      details: product.details || [],
+      warranties: product.warranty ? [{
+        warranty_period: product.warranty.warranty_period || '',
+        warranty_provider: product.warranty.warranty_provider || '',
+        warranty_conditions: product.warranty.warranty_conditions || ''
+      }] : [{
+        warranty_period: '',
+        warranty_provider: '',
+        warranty_conditions: ''
+      }]
+    };
 
-  useEffect(() => {
-    if (!showModal) {
-      setFormData({});
-      setCurrentProduct(null);
-    }
-  }, [showModal]);
+    setCurrentProduct(formattedProduct);
+    setShowModal(true);
+  };
 
-  // Fix the handleSubmit function to remove duplicate getProducts calls
+  const handleModalClose = () => {
+    setShowModal(false);
+    setCurrentProduct(null);
+  };
+
   const handleSubmit = async (productData) => {
-      try {
-          const formattedData = {
-              ...productData,
-              price: Number(productData.price),
-              stock: Number(productData.stock),
-              warrantyData: productData.warranties?.map(warranty => ({
-                  warranty_period: warranty.warranty_period || '',
-                  warranty_provider: warranty.warranty_provider || '',
-                  warranty_conditions: warranty.warranty_conditions || ''
-              })) || []
-          };
-  
-          if (currentProduct) {
-              await dispatch(updateProduct({
-                  id: currentProduct.id,
-                  productData: formattedData
-              }));
-           
-          } else {
-              await dispatch(addProduct(formattedData));
-          }
-          
-          setShowModal(false);
-          await dispatch(getProducts()); // Single refresh call
-          toast.success(`Đã ${currentProduct ? 'cập nhật' : 'thêm'} sản phẩm thành công!`);
-      } catch (error) {
-          toast.error(`Lỗi khi ${currentProduct ? 'cập nhật' : 'thêm'} sản phẩm: ${error.message}`);
+    try {
+      // Format the data before sending
+      const formattedData = {
+        ...productData,
+        id_categories: Number(productData.id_categories),
+        manufacturer_id: Number(productData.manufacturer_id),
+        price: Number(productData.price),
+        stock: Number(productData.stock),
+        weight: productData.weight ? Number(productData.weight) : null,
+        quantity: productData.quantity ? Number(productData.quantity) : null,
+        is_active: Number(productData.is_active),
+        product_details: productData.details?.filter(detail => detail.spec_name && detail.spec_value)
+          .map((detail, index) => ({
+            spec_name: detail.spec_name,
+            spec_value: detail.spec_value,
+            sort_order: index + 1
+          })) || [],
+        warranties: productData.warranties?.filter(w => 
+          w.warranty_period || w.warranty_provider || w.warranty_conditions
+        ) || [],
+        images: productData.images?.map(img => ({
+          url: img.url || img.image_url,
+          sort_order: img.sort_order || 1
+        })) || []
+      };
+
+      // Remove empty arrays
+      if (!formattedData.product_details?.length) {
+        delete formattedData.product_details;
+      }
+      if (!formattedData.warranties?.length) {
+        delete formattedData.warranties;
+      }
+      if (!formattedData.images?.length) {
+        delete formattedData.images;
       }
 
+      // Remove the old details field if it exists
+      delete formattedData.details;
+
+      if (currentProduct) {
+        await dispatch(updateProduct({
+          id: currentProduct.id,
+          productData: formattedData
+        }));
+        toast.success('Cập nhật sản phẩm thành công!');
+      } else {
+        await dispatch(addProduct(formattedData));
+        toast.success('Thêm sản phẩm mới thành công!');
+      }
+      setShowModal(false);
+      dispatch(getProducts()); // Refresh the product list
+    } catch (error) {
+      toast.error(`Lỗi: ${error.message}`);
+    }
   };
-  
-  // Also fix the handleEdit function to remove unnecessary getProducts call
-  const handleEdit = (product) => {
-      setCurrentProduct(product);
-      setFormData({
-          name: product?.name || '',
-          description: product?.description || '',
-          price: product?.price || 0,
-          stock: product?.stock || 0,
-          sku: product?.sku || '',
-          category_id: product?.category_id || '',
-          weight: product?.weight || '',
-          dimensions: product?.dimensions || '',
-          is_active: product?.is_active || 1,
-          main_image_url: product?.main_image_url || '',
-          images: product?.images || [],
-          warrantyData: product?.warranties || [],
-          manufacturer_id: product?.manufacturer_id || '',
-          categories: product?.categories || [],
-          details: product?.details || []
-      });
-      setShowModal(true);
-       dispatch(getProducts()); // Single refresh call
-  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
@@ -201,15 +199,12 @@ const Product = () => {
           </Col>
         </Row>
       </Container>
+      {console.log('DEBUG currentProduct in Product:', currentProduct)}
       <ProductModal
         show={showModal}
-        handleClose={() => setShowModal(false)}
-        handleSubmit={handleSubmit} // Make sure this is passed
+        handleClose={handleModalClose}
         product={currentProduct}
-        isEditing={!!currentProduct}
-        handleChange={handleInputChange}
-        formData={formData}
-        categories={categories}
+        onSubmit={handleSubmit}
       />
       <ToastContainer position="bottom-right" />
     </Layout>

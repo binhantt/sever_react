@@ -34,6 +34,7 @@ export const updateProduct = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const { id, productData } = payload;
+      console.log(productData);
       const response = await axios.put(
         `${ApiConfig.severAdmin}/products/update/${id}`,
         productData

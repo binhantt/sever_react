@@ -13,6 +13,8 @@ const OrderModal = ({
     user_email: '',
     user_phone: '',
     shipping_address: '',
+    order_name: '',
+    order_phone: '',
     status: 'pending',
     items: [],
     total_amount: 0
@@ -21,11 +23,13 @@ const OrderModal = ({
   useEffect(() => {
     if (order) {
       setFormData({
-        user_name: order.user_name || '',
         user_email: order.user_email || '',
+        user_name: order.user_name || '',
+        user_phone: order.user_phone || '',
         shipping_address: order.shipping_address || '',
         user_phone: order.user_phone || '', 
-        
+        order_name: order.order_name || '',
+        order_phone: order.order_phone || '',
         status: order.status || 'pending',
         items: order.items || [],
         total_amount: order.total_amount || 0
@@ -99,8 +103,8 @@ const OrderModal = ({
             <Form.Label>Tên khách hàng</Form.Label>
             <Form.Control
               type="text"
-              name="user_name"
-              value={formData.user_name}
+              name="user_name || order_name"
+              value={formData.user_name || formData.order_name}
               onChange={handleChange}
               required
             />
@@ -109,11 +113,11 @@ const OrderModal = ({
           <Form.Group className="mb-3">
             <Form.Label>Email</Form.Label>
             <Form.Control
-              type="email"
-              name="user_email"
-              value={formData.user_email}
+              type="text"
+              name="user_email "
+              value={formData.user_email }
               onChange={handleChange}
-              required
+            
             />
           </Form.Group>
 
@@ -121,8 +125,8 @@ const OrderModal = ({
             <Form.Label>Số điện thoại</Form.Label>
             <Form.Control
               type="tel"
-              name="user_phone"
-              value={formData.user_phone}
+              name="user_phone || order_phone"
+              value={formData.user_phone || formData.order_phone}
               onChange={handleChange}
               required
             />

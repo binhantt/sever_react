@@ -19,7 +19,7 @@ const GeneralInfo = ({ formData, handleChange, categories, manufacturers }) => {
         <Form.Control
           type="text"
           name="name"
-          value={formData.name}
+          value={formData.name || ''}
           onChange={handleChange}
           required
           className="border-secondary"
@@ -30,12 +30,12 @@ const GeneralInfo = ({ formData, handleChange, categories, manufacturers }) => {
         <Form.Label className="fw-bold">Danh mục sản phẩm</Form.Label>
         <Form.Select
           name="id_categories"
-          value={formData.id_categories}
+          value={formData.id_categories || ''}
           onChange={handleChange}
           required
           className="border-secondary"
         >
-    
+          <option value="">Chọn danh mục</option>
           {Array.isArray(categories) && categories.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
@@ -48,12 +48,13 @@ const GeneralInfo = ({ formData, handleChange, categories, manufacturers }) => {
         <Form.Label className="fw-bold">Nhà sản xuất</Form.Label>
         <Form.Select
           name="manufacturer_id"
-          value={formData.manufacturer_id }
+          value={formData.manufacturer_id || ''}
           onChange={handleChange}
+          required
           className="border-secondary"
         >
-        
-          { manufacturers.data?.map(manufacturer => (
+          <option value="">Chọn nhà sản xuất</option>
+          {Array.isArray(manufacturers?.data) && manufacturers.data.map(manufacturer => (
             <option key={manufacturer.id} value={manufacturer.id}>
               {manufacturer.name}
             </option>
@@ -66,7 +67,7 @@ const GeneralInfo = ({ formData, handleChange, categories, manufacturers }) => {
         <Form.Control
           as="textarea"
           name="description"
-          value={formData.description}
+          value={formData.description || ''}
           onChange={handleChange}
           rows={3}
           className="border-secondary"
@@ -80,9 +81,11 @@ const GeneralInfo = ({ formData, handleChange, categories, manufacturers }) => {
             <Form.Control
               type="number"
               name="price"
-              value={formData.price}
+              value={formData.price || ''}
               onChange={handleChange}
               required
+              min="0"
+              step="0.01"
               className="border-secondary"
             />
           </Form.Group>
@@ -92,10 +95,12 @@ const GeneralInfo = ({ formData, handleChange, categories, manufacturers }) => {
             <Form.Label className="fw-bold">Số lượng tồn kho</Form.Label>
             <Form.Control
               type="number"
-              name="quantity"
-              value={formData.quantity}
+              name="stock"
+              value={formData.stock || ''}
               onChange={handleChange}
               required
+              min="0"
+              step="1"
               className="border-secondary"
             />
           </Form.Group>
