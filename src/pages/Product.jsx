@@ -65,30 +65,34 @@ const Product = () => {
     );
   };
 
-  const handleEdit = (product) => {
-    // Format the product data for editing
+  const handleEdit = (products) => {
+    console.log('Editing product:', products.details);
+    // Format the products data for editing
     const formattedProduct = {
-      ...product,
-      quantity: product.quantity || 1,
-      id_categories: Number(product.id_categories) || (product.categories ? Number(product.categories.id) : ''),
-      manufacturer_id: Number(product.manufacturer_id) || (product.manufacturers ? Number(product.manufacturers.id) : ''),
-      images: product.images || [],
-      details: product.details || [],
-      warranties: product.warranty ? [{
-        warranty_period: product.warranty.warranty_period || '',
-        warranty_provider: product.warranty.warranty_provider || '',
-        warranty_conditions: product.warranty.warranty_conditions || ''
+      ...products,
+      quantity: products.quantity || 1,
+      id_categories: Number(products.id_categories) || (products.categories ? Number(products.categories.id) : ''),
+      manufacturer_id: Number(products.manufacturer_id) || (products.manufacturers ? Number(products.manufacturers.id) : ''),
+      images: products.images || [],
+      details: products.details ? products.details.map(detail => ({
+        spec_name: detail.spec_name || '',
+        spec_value: detail.spec_value || '',
+        sort_order: detail.sort_order || 1
+      })) : [{ spec_name: '', spec_value: '', sort_order: 1 }],
+      warranties: products.warranty ? [{
+        warranty_period: products.warranty.warranty_period || '',
+        warranty_provider: products.warranty.warranty_provider || '',
+        warranty_conditions: products.warranty.warranty_conditions || ''
       }] : [{
         warranty_period: '',
         warranty_provider: '',
         warranty_conditions: ''
       }]
     };
-
     setCurrentProduct(formattedProduct);
     setShowModal(true);
-  };
 
+  };
   const handleModalClose = () => {
     setShowModal(false);
     setCurrentProduct(null);
@@ -96,7 +100,6 @@ const Product = () => {
 
   const handleSubmit = async (productData) => {
     try {
-      // Format the data before sending
       const formattedData = {
         ...productData,
         id_categories: Number(productData.id_categories),
@@ -120,7 +123,7 @@ const Product = () => {
           sort_order: img.sort_order || 1
         })) || []
       };
-
+      
       // Remove empty arrays
       if (!formattedData.product_details?.length) {
         delete formattedData.product_details;
@@ -146,7 +149,7 @@ const Product = () => {
         toast.success('Thêm sản phẩm mới thành công!');
       }
       setShowModal(false);
-      dispatch(getProducts()); // Refresh the product list
+      dispatch(getProducts()); // Refresh the products list
     } catch (error) {
       toast.error(`Lỗi: ${error.message}`);
     }
@@ -199,7 +202,7 @@ const Product = () => {
           </Col>
         </Row>
       </Container>
-      {console.log('DEBUG currentProduct in Product:', currentProduct)}
+    {console.log('Products:', currentProduct)}
       <ProductModal
         show={showModal}
         handleClose={handleModalClose}

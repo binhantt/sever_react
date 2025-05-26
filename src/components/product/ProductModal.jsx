@@ -9,10 +9,9 @@ import ProductDetails from './modal/ProductDetails';
 
 const ProductModal = ({ show, handleClose, product, onSubmit }) => {
   const dispatch = useDispatch();
-
+  
   const { data: categories } = useSelector(state => state.category);
   const { data: manufacturers } = useSelector(state => state.manufacturers);
-  console.log('DEBUG product in ProductModal:', product);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -96,7 +95,7 @@ const ProductModal = ({ show, handleClose, product, onSubmit }) => {
       });
     }
   }, [product]);
-
+ 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
     
@@ -168,7 +167,7 @@ const ProductModal = ({ show, handleClose, product, onSubmit }) => {
       images: formData.images?.map(img => ({
         url: img.url || img.image_url
       })) || [],
-      details: formData.details
+      productDetails: formData.details
         ?.filter(detail => detail.spec_name && detail.spec_value)
         .map((detail, index) => ({
           spec_name: detail.spec_name,

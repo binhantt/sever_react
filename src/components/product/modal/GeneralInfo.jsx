@@ -2,15 +2,7 @@ import React from 'react';
 import { Form } from 'react-bootstrap';
 
 const GeneralInfo = ({ formData, handleChange, categories, manufacturers }) => {
-
-  const cate = (Category , formData)=>{
-    const categoryId = Number(formData.categoryId); // Ép về số, vì categoryId trong Category là số
-    const matchedCategory = Category.find(cat => cat.id === categoryId);
-    if (matchedCategory === categoryId) {
-          return matchedCategory
-    }
-
-  }
+ 
   return (
     <div className="bg-white p-4 rounded shadow-sm mb-4">
       <h5 className="mb-4 text-primary">Thông tin chung</h5>
@@ -53,7 +45,12 @@ const GeneralInfo = ({ formData, handleChange, categories, manufacturers }) => {
           required
           className="border-secondary"
         >
-          <option value="">Chọn nhà sản xuất</option>
+          {!formData.manufacturers?.name && <option value="">Chọn nhà sản xuất</option>}
+          {formData.manufacturers?.name && (
+            <option value={formData.manufacturers.id}>
+              {formData.manufacturers.name}
+            </option>
+          )}
           {Array.isArray(manufacturers?.data) && manufacturers.data.map(manufacturer => (
             <option key={manufacturer.id} value={manufacturer.id}>
               {manufacturer.name}
@@ -110,4 +107,4 @@ const GeneralInfo = ({ formData, handleChange, categories, manufacturers }) => {
   );
 };
 
-export default GeneralInfo; 
+export default GeneralInfo;

@@ -3,7 +3,7 @@ import { Form, Button } from 'react-bootstrap';
 
 const ProductDetails = ({ formData, handleChange }) => {
 
-  console.log('DEBUG formData in ProductDetails:', formData);
+
   const handleWarrantyChange = (index, e) => {
     const { name, value } = e.target;
     const warranties = [...(formData.warranties || [])];
@@ -216,7 +216,7 @@ const ProductDetails = ({ formData, handleChange }) => {
             + Thêm thông số
           </Button>
         </div>
-      { console.log('DEBUG formData.details in ProductDetails:', formData.details)}
+    
         {Array.isArray(formData.details) && formData.details.map((detail, index) => (
           <div key={index} className="border rounded p-3 mb-3 position-relative bg-light">
             <Button
